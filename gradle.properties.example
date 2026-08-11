@@ -1,0 +1,3 @@
+# Optional project-wide override used by android/app/build.gradle.kts.
+# Copy to android/gradle.properties or pass -PCAST_RECEIVER_APP_ID=... locally.
+CAST_RECEIVER_APP_ID=REPLACE_ME

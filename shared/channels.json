@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "channels": [
+    {
+      "id": "p1",
+      "name": "P1",
+      "shortName": "P1",
+      "description": "Nyheter, samhälle, kultur och vetenskap.",
+      "streamUrl": "https://live1.sr.se/p1-aac-128",
+      "streamQuality": "AAC_128",
+      "streamFormat": "AAC",
+      "imageUrl": null,
+      "category": "NATIONAL",
+      "region": null,
+      "isLocal": false,
+      "isFavoriteCapable": true
+    },
+    {
+      "id": "p2",
+      "name": "P2",
+      "shortName": "P2",
+      "description": "Klassisk musik, jazz, folk och program på flera språk.",
+      "streamUrl": "https://live1.sr.se/p2-aac-128",
+      "streamQuality": "AAC_128",
+      "streamFormat": "AAC",
+      "imageUrl": null,
+      "category": "NATIONAL",
+      "region": null,
+      "isLocal": false,
+      "isFavoriteCapable": true
+    },
+    {
+      "id": "p3",
+      "name": "P3",
+      "shortName": "P3",
+      "description": "Musik, humor, populärkultur och unga röster.",
+      "streamUrl": "https://live1.sr.se/p3-aac-128",
+      "streamQuality": "AAC_128",
+      "streamFormat": "AAC",
+      "imageUrl": null,
+      "category": "NATIONAL",
+      "region": null,
+      "isLocal": false,
+      "isFavoriteCapable": true
+    },
+    {
+      "id": "p4-malmo",
+      "name": "P4 Malmöhus",
+      "shortName": "P4 Malmöhus",
+      "description": "Lokala nyheter, sport, trafik och musik från Malmöhus.",
+      "streamUrl": "https://live1.sr.se/p4malm-aac-128",
+      "streamQuality": "AAC_128",
+      "streamFormat": "AAC",
+      "imageUrl": null,
+      "category": "LOCAL_P4",
+      "region": "Malmöhus",
+      "isLocal": true,
+      "isFavoriteCapable": true
+    },
+    {
+      "id": "p4-kristianstad",
+      "name": "P4 Kristianstad",
+      "shortName": "P4 Kristianstad",
+      "description": "Lokala nyheter, sport, trafik och musik från Kristianstad.",
+      "streamUrl": "https://live1.sr.se/p4krist-aac-128",
+      "streamQuality": "AAC_128",
+      "streamFormat": "AAC",
+      "imageUrl": null,
+      "category": "LOCAL_P4",
+      "region": "Kristianstad",
+      "isLocal": true,
+      "isFavoriteCapable": true
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+# Android / Gradle
+.gradle/
+**/build/
+android/local.properties
+*.apk
+*.aab
+
+# Node
+**/node_modules/
+receiver/dist/
+receiver/coverage/
+receiver/public/generated/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+local.properties
+*.keystore
+*.jks
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Temporary files and local caches
+*.tmp
+*.temp
+*~
+.cache/
+
+# Test artifacts (keep documentation/placeholders)
+test-results/*
+!test-results/.gitkeep
+!test-results/REAL_DEVICE_TEST_TEMPLATE.md
