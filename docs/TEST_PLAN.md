@@ -23,9 +23,12 @@ metadata/artwork, optional current-program metadata and absence of custom data.
 
 `MediaRouteButtonThemeTest` verifies that the Compose-hosted MediaRouter button
 receives an opaque AppCompat `colorPrimary` and that the framework view can be
-constructed with its dedicated XML theme. This is local regression coverage;
-confirming the original Samsung startup crash is resolved is
-**REAL_DEVICE_REQUIRED**.
+constructed with its dedicated XML theme. Startup with that fix has passed
+physical Samsung verification.
+
+`MainActivityHostTest` prevents the route-dialog host from regressing away from
+`FragmentActivity`; opening the MediaRouter chooser by tapping the Cast button
+remains **REAL_DEVICE_REQUIRED**.
 
 ## Temporary Default Receiver physical test
 
