@@ -87,3 +87,8 @@ sender/stream testing without an Application ID. `CUSTOM` remains the default,
 and D001 remains the accepted product architecture. Default Receiver results do
 not verify GitHub Pages, custom UI/lifecycle, Media Browse, touch navigation or
 receiver-side metadata refresh.
+
+On 2026-08-11 this temporary test harness passed a physical Samsung → Cast →
+Nest Hub → SR live AAC test for route selection, connection, P1, channel change,
+P3 and P4 Malmöhus. This result does not change D001 or promote Default Media
+Receiver to product architecture.

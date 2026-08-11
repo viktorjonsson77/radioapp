@@ -61,7 +61,8 @@ CAST_RECEIVER_MODE=DEFAULT
 
 This uses Google's SDK constant for the Default Media Receiver and needs no
 Application ID. It tests only sender-to-stream fundamentals, never RadioApp's
-Custom Receiver. See [docs/DEFAULT_RECEIVER_TEST.md](docs/DEFAULT_RECEIVER_TEST.md).
+Custom Receiver. See [docs/DEFAULT_RECEIVER_TEST.md](docs/DEFAULT_RECEIVER_TEST.md)
+and the current [project status](docs/PROJECT_STATUS.md).
 
 ## Current verification boundary
 
@@ -69,10 +70,12 @@ Custom Receiver. See [docs/DEFAULT_RECEIVER_TEST.md](docs/DEFAULT_RECEIVER_TEST.
   all 25 regional P4 services. Android and receiver use SR's documented
   right-now API with bounded cache and metadata-independent playback.
 - Build and local unit tests verify schemas, mappings, fallbacks and artifacts.
-- A real registered Cast/Nest Hub is required to verify discovery, launch,
-  receiver playback, Media Browse, touch, CORS behavior and session persistence.
-- No real-device verification is claimed by this repository.
+- Google Default Media Receiver passed a real Samsung/Nest Hub test on
+  2026-08-11 for discovery, connection, P1, channel switching, P3 and P4
+  Malmöhus playback.
+- A registered Custom Receiver is still required to verify RadioApp's receiver,
+  Media Browse, Hub touch, receiver metadata and Custom Receiver persistence.
 
 `EXTERNAL_BLOCKER`: Google Cast Developer Console identity/payment verification
 currently prevents developer registration. This is not a code, build or
-architecture failure. **REAL CAST DEVICE NOT YET VERIFIED.**
+architecture failure. **CUSTOM RECEIVER REAL DEVICE NOT YET VERIFIED.**

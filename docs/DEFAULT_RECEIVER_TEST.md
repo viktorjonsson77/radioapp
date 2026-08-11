@@ -44,8 +44,9 @@ Receiver: Google Default Media Receiver
 TEMPORARY TEST MODE · Inte RadioApps Custom Receiver
 ```
 
-Record the physical run in
-`test-results/DEFAULT_RECEIVER_DEVICE_TEST_TEMPLATE.md`.
+Record future physical runs using
+`test-results/DEFAULT_RECEIVER_DEVICE_TEST_TEMPLATE.md`. The 2026-08-11 baseline
+is recorded in `test-results/default-receiver-device-test-2026-08-11.md`.
 
 ## What this mode can test
 

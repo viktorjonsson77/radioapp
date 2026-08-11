@@ -27,15 +27,24 @@ constructed with its dedicated XML theme. Startup with that fix has passed
 physical Samsung verification.
 
 `MainActivityHostTest` prevents the route-dialog host from regressing away from
-`FragmentActivity`; opening the MediaRouter chooser by tapping the Cast button
-remains **REAL_DEVICE_REQUIRED**.
+`FragmentActivity`. Startup, `MediaRouteButton` rendering and opening the route
+chooser passed physical Samsung verification on 2026-08-11.
 
-## Temporary Default Receiver physical test
+## DEFAULT MEDIA RECEIVER — REAL DEVICE VERIFIED
 
-Use `docs/DEFAULT_RECEIVER_TEST.md` and record results in
-`test-results/DEFAULT_RECEIVER_DEVICE_TEST_TEMPLATE.md`. This may verify only
-Android Sender → Google Cast → SR stream. It cannot verify any Custom Receiver,
-Media Browse, Hub-touch browser, Hub-only navigation or GitHub Pages behavior.
+The physical result is recorded in
+`test-results/default-receiver-device-test-2026-08-11.md`; retain
+`test-results/DEFAULT_RECEIVER_DEVICE_TEST_TEMPLATE.md` for later runs. The test
+verified Android startup, the standard route picker, Nest Hub selection and
+connection, P1, Android-driven channel switching, P3 and P4 Malmöhus over the
+Android Sender → Google Cast → Google Default Media Receiver → Nest Hub → SR
+live AAC path.
+
+Metadata presentation, pause/play, stop, sender background/close behavior,
+reopen and session recovery were not tested in that run. The run cannot verify
+the Custom Web Receiver, GitHub Pages in Cast runtime, Media Browse, Hub-touch
+or Hub-only navigation, receiver-side metadata refresh, or Custom Receiver
+session persistence.
 
 ## Optional live smoke verification
 
@@ -45,8 +54,10 @@ node tools/sr-live-smoke-test.mjs
 
 This checks all stream headers with bounded requests, then P3 right-now response shape and browser-origin CORS. It is deliberately excluded from ordinary builds because live network state must not make deterministic tests fail.
 
-## REAL_DEVICE_REQUIRED
+## CUSTOM RECEIVER — REAL DEVICE REQUIRED
 
 Record device, firmware, commit and APK hash in `test-results/`. Verify discovery, custom receiver launch, direct AAC playback, program/artwork updates, landing and in-player Browse, Hub touch LOAD, reconnect, sender disconnect, stop/restart/idle and API/stream failure behavior.
 
-Automated and browser tests must be reported as **BUILD VERIFIED** / **LOCAL TEST VERIFIED** only. Until registration succeeds: **REAL CAST DEVICE NOT YET VERIFIED**.
+Automated and browser tests must be reported as **BUILD VERIFIED** / **LOCAL
+TEST VERIFIED** only. Until registration succeeds: **CUSTOM RECEIVER REAL DEVICE
+NOT YET VERIFIED**.
