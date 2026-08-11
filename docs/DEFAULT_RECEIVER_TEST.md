@@ -37,7 +37,9 @@ cd /opt/radioapp/android
 adb install -r /opt/radioapp/android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-The Android UI must show:
+The Android debug UI exposes the following diagnostics at the bottom of the
+screen; release/product presentation does not show receiver implementation
+terms:
 
 ```text
 Receiver: Google Default Media Receiver

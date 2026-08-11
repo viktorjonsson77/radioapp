@@ -21,11 +21,14 @@ import se.radioapp.app.domain.model.ChannelCategory
 import se.radioapp.app.domain.model.NowPlayingMetadata
 import se.radioapp.app.domain.repository.ChannelRepository
 import se.radioapp.app.domain.repository.FavoriteRepository
+import se.radioapp.app.domain.repository.RadioSettingsRepository
+import se.radioapp.app.data.settings.RadioSettings
 
 data class RadioUiState(
     val loading: Boolean = true,
     val channels: List<Channel> = emptyList(),
     val favoriteIds: Set<String> = emptySet(),
+    val defaultP4ChannelId: String = RadioSettings.DEFAULT_P4_CHANNEL_ID,
     val nowPlaying: NowPlayingMetadata? = null,
     val error: String? = null,
 ) {
@@ -33,11 +36,13 @@ data class RadioUiState(
     val nationalChannels: List<Channel> get() = channels.filter { it.category == ChannelCategory.NATIONAL }
     val p4Channels: List<Channel> get() = channels.filter { it.category == ChannelCategory.LOCAL_P4 }
     val otherChannels: List<Channel> get() = channels.filter { it.category != ChannelCategory.NATIONAL && it.category != ChannelCategory.LOCAL_P4 }
+    val defaultP4Channel: Channel? get() = RadioSettings.resolveDefaultP4(channels, defaultP4ChannelId)
 }
 
 class RadioViewModel(
     private val channels: ChannelRepository,
     private val favorites: FavoriteRepository,
+    private val settings: RadioSettingsRepository,
     private val metadata: SrMetadataProvider,
     private val castController: CastController,
 ) : ViewModel() {
@@ -50,16 +55,17 @@ class RadioViewModel(
     val uiState: StateFlow<RadioUiState> = combine(
         loadedChannels,
         favorites.favoriteIds,
+        settings.defaultP4ChannelId,
         loading,
-        loadError,
-    ) { channelList, favoriteIds, isLoading, error ->
+    ) { channelList, favoriteIds, defaultP4ChannelId, isLoading ->
         RadioUiState(
             loading = isLoading,
             channels = channelList,
             favoriteIds = favoriteIds.intersect(channelList.mapTo(mutableSetOf()) { it.id }),
-            error = error,
+            defaultP4ChannelId = defaultP4ChannelId,
         )
-    }.combine(nowPlaying) { state, program -> state.copy(nowPlaying = program) }
+    }.combine(loadError) { state, error -> state.copy(error = error) }
+        .combine(nowPlaying) { state, program -> state.copy(nowPlaying = program) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RadioUiState())
 
     val castState: StateFlow<CastUiState> = castController.state
@@ -94,6 +100,11 @@ class RadioViewModel(
         viewModelScope.launch {
             favorites.setFavorite(channel.id, channel.id !in uiState.value.favoriteIds)
         }
+    }
+
+    fun setDefaultP4(channel: Channel) {
+        if (channel.category != ChannelCategory.LOCAL_P4) return
+        viewModelScope.launch { settings.setDefaultP4ChannelId(channel.id) }
     }
 
     fun togglePlayback() = castController.togglePlayback()

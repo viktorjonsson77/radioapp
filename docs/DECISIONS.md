@@ -94,3 +94,17 @@ On 2026-08-11 this temporary test harness passed a physical Samsung → Cast →
 Nest Hub → SR live AAC test for route selection, connection, P1, channel change,
 P3 and P4 Malmöhus. This result does not change D001 or promote Default Media
 Receiver to product architecture.
+
+## D015 — Single-screen radio product hierarchy
+
+Android remains one scrollable screen with Now Playing first, then compact
+favorites, national channels, a collapsed P4 entry and other channels. Default
+P4 is persisted locally by stable channel ID and selected in a small dialog.
+This keeps the common radio actions immediate without adding navigation solely
+for settings.
+
+Receiver/browser presentation follows the same hierarchy while retaining two
+distinct runtimes: browser mode is a useful preview, not a Cast emulator, and
+the Custom Receiver continues to use CAF's standard player surface. Technical
+DEFAULT/CUSTOM receiver information is debug-only on Android. This UI decision
+does not alter D001, receiver selection or stream ownership.

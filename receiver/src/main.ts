@@ -1,46 +1,156 @@
 import "./style.css";
-import { Channel, loadChannels } from "./channel";
+import { loadChannels } from "./channel";
+import type { Channel } from "./channel";
+import { groupChannelsForBrowser } from "./browser/catalog";
 import { createBrowsePlan } from "./browse/catalog";
 import { toCastBrowseContent } from "./browse/castBrowse";
 import { channelIdFromEntity, mapChannelToMedia, metadataRefreshDelayMs, SrMetadataProvider } from "./metadata";
+import type { NowPlayingMetadata } from "./metadata";
 
 const status = document.querySelector<HTMLElement>("#receiver-status");
-const preview = document.querySelector<HTMLElement>("#channel-preview");
 const errorOverlay = document.querySelector<HTMLElement>("#error-overlay");
-const metadataPreview = document.querySelector<HTMLElement>("#metadata-preview");
+const nowArtwork = document.querySelector<HTMLImageElement>("#now-artwork");
+const nowChannel = document.querySelector<HTMLElement>("#now-channel");
+const nowProgram = document.querySelector<HTMLElement>("#now-program");
+const nowDescription = document.querySelector<HTMLElement>("#now-description");
+const nowLiveRow = document.querySelector<HTMLElement>("#now-live-row");
+const nowTime = document.querySelector<HTMLElement>("#now-time");
+const nowNext = document.querySelector<HTMLElement>("#now-next");
 const metadataProvider = new SrMetadataProvider();
+let errorTimer: number | undefined;
 
 function log(event: string, data?: unknown): void {
   data === undefined ? console.info(`[RadioApp Receiver] ${event}`) : console.info(`[RadioApp Receiver] ${event}`, data);
 }
 
-function showError(message: string): void {
+function showError(message: string, persistent = false): void {
   console.error(`[RadioApp Receiver] ${message}`);
-  if (errorOverlay) { errorOverlay.textContent = message; errorOverlay.hidden = false; }
+  if (!errorOverlay) return;
+  if (errorTimer !== undefined) window.clearTimeout(errorTimer);
+  errorOverlay.textContent = message;
+  errorOverlay.hidden = false;
+  if (!persistent) {
+    errorTimer = window.setTimeout(() => { errorOverlay.hidden = true; }, 6_000);
+  }
 }
 
-function showBrowserPreview(channels: Channel[]): void {
-  if (status) status.textContent = "Browserläge – inte en Cast-emulator";
+function showBrowserPreview(channels: Channel[], fallbackImage: string): void {
+  if (status) status.textContent = "Webbläge · inte Cast";
+  const groups = groupChannelsForBrowser(channels);
   const audio = new Audio();
-  if (preview) {
-    preview.replaceChildren(...channels.map((channel) => {
-      const card = document.createElement("button");
-      card.className = "preview-card";
-      card.textContent = channel.name;
-      card.addEventListener("click", async () => {
-        audio.src = channel.streamUrl;
-        void audio.play().catch((error) => showError(`Browser playback failed: ${String(error)}`));
-        if (metadataPreview) metadataPreview.textContent = `${channel.name} · Sveriges Radio · LIVE`;
-        try {
-          const program = await metadataProvider.nowPlaying(channel);
-          if (metadataPreview && program) metadataPreview.textContent = `${channel.name} · ${program.programName} · LIVE`;
-        } catch (error) {
-          log("browser metadata fallback", error);
-        }
-      });
-      return card;
-    }));
+
+  const select = async (channel: Channel): Promise<void> => {
+    document.querySelectorAll<HTMLElement>(".channel-card").forEach((card) => {
+      card.classList.toggle("is-playing", card.dataset.channelId === channel.id);
+      card.setAttribute("aria-pressed", String(card.dataset.channelId === channel.id));
+      const subtitle = card.querySelector("small");
+      if (subtitle) subtitle.textContent = card.dataset.channelId === channel.id ? "LIVE · Spelas nu" : card.dataset.subtitle ?? "Sveriges Radio";
+    });
+    updateBrowserNowPlaying(channel, null, fallbackImage);
+    audio.src = channel.streamUrl;
+    void audio.play().catch((error) => {
+      log("browser playback failed", error);
+      showError("Ljudet kunde inte startas i webbläsaren.");
+    });
+    try {
+      const program = await metadataProvider.nowPlaying(channel);
+      updateBrowserNowPlaying(channel, program, fallbackImage);
+    } catch (error) {
+      log("browser metadata fallback", error);
+    }
+  };
+
+  const render = (targetId: string, items: Channel[], variant = ""): void => {
+    const target = document.querySelector<HTMLElement>(`#${targetId}`);
+    target?.replaceChildren(...items.map((channel) => createBrowserChannelCard(channel, fallbackImage, variant, () => void select(channel))));
+  };
+
+  render("favorite-preview", groups.favorites, "favorite-card");
+  render("national-preview", groups.national);
+  render("p4-preview", groups.p4);
+  render("other-preview", groups.other);
+  if (groups.defaultP4) render("p4-default", [groups.defaultP4], "default-card");
+
+  const p4Toggle = document.querySelector<HTMLButtonElement>("#p4-toggle");
+  const p4Preview = document.querySelector<HTMLElement>("#p4-preview");
+  p4Toggle?.addEventListener("click", () => {
+    const expanded = p4Toggle.getAttribute("aria-expanded") !== "true";
+    p4Toggle.setAttribute("aria-expanded", String(expanded));
+    p4Toggle.textContent = expanded ? "Dölj" : "Visa alla";
+    if (p4Preview) p4Preview.hidden = !expanded;
+  });
+}
+
+function createBrowserChannelCard(
+  channel: Channel,
+  fallbackImage: string,
+  variant: string,
+  onSelect: () => void,
+): HTMLButtonElement {
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = `channel-card ${variant}`.trim();
+  card.dataset.channelId = channel.id;
+  card.dataset.subtitle = channel.isLocal ? `Lokalt · ${channel.region?.name ?? channel.name}` : "Sveriges Radio";
+  card.setAttribute("aria-label", `Spela ${channel.name}`);
+  card.setAttribute("aria-pressed", "false");
+
+  const image = document.createElement("img");
+  image.src = channel.imageUrl ?? fallbackImage;
+  image.alt = "";
+  image.addEventListener("error", () => { image.src = fallbackImage; }, { once: true });
+  const copy = document.createElement("span");
+  copy.className = "channel-card-copy";
+  const title = document.createElement("strong");
+  title.textContent = channel.name;
+  const subtitle = document.createElement("small");
+  subtitle.textContent = card.dataset.subtitle;
+  copy.append(title, subtitle);
+  card.append(image, copy);
+  card.addEventListener("click", onSelect);
+  return card;
+}
+
+function updateBrowserNowPlaying(channel: Channel, program: NowPlayingMetadata | null, fallbackImage: string): void {
+  if (nowArtwork) {
+    nowArtwork.src = program?.imageUrl ?? channel.imageUrl ?? fallbackImage;
+    nowArtwork.alt = program?.programName ?? channel.name;
+    nowArtwork.onerror = () => {
+      nowArtwork.onerror = null;
+      nowArtwork.src = fallbackImage;
+    };
   }
+  if (nowChannel) nowChannel.textContent = channel.name;
+  if (nowProgram) nowProgram.textContent = program?.programName ?? "Sveriges Radio";
+  if (nowDescription) {
+    nowDescription.textContent = program?.programDescription ?? "";
+    nowDescription.hidden = !program?.programDescription;
+  }
+  if (nowLiveRow) nowLiveRow.hidden = false;
+  if (nowTime) nowTime.textContent = formatProgramTime(program);
+  if (nowNext) {
+    const next = program?.nextProgram;
+    if (next) {
+      const label = document.createElement("strong");
+      label.textContent = `Nästa${next.startsAt ? ` · ${formatTime(next.startsAt)}` : ""}`;
+      const name = document.createElement("span");
+      name.textContent = next.name;
+      nowNext.replaceChildren(label, name);
+      nowNext.hidden = false;
+    } else {
+      nowNext.replaceChildren();
+      nowNext.hidden = true;
+    }
+  }
+  document.title = `${channel.name} · RadioApp`;
+}
+
+function formatProgramTime(program: NowPlayingMetadata | null): string {
+  return program?.startsAt && program.endsAt ? `${formatTime(program.startsAt)}–${formatTime(program.endsAt)}` : "";
+}
+
+function formatTime(date: Date): string {
+  return new Intl.DateTimeFormat("sv-SE", { hour: "2-digit", minute: "2-digit" }).format(date);
 }
 
 async function bootstrap(): Promise<void> {
@@ -50,12 +160,13 @@ async function bootstrap(): Promise<void> {
   try {
     channels = await loadChannels(`${receiverBase}generated/channels.json`);
   } catch (error) {
-    showError(`Kanallistan kunde inte läsas: ${String(error)}`);
+    log("channel catalog unavailable", error);
+    showError("Kanalerna kunde inte hämtas.", true);
     return;
   }
 
   if (typeof cast === "undefined" || !cast.framework) {
-    showBrowserPreview(channels);
+    showBrowserPreview(channels, `${receiverBase}assets/radioapp-channel.svg`);
     return;
   }
 

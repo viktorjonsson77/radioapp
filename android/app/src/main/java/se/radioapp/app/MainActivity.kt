@@ -23,11 +23,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val appContext = applicationContext
+        val preferences = DataStoreFavoriteRepository(appContext)
         val factory = viewModelFactory {
             initializer {
                 RadioViewModel(
                     channels = AssetChannelRepository(appContext),
-                    favorites = DataStoreFavoriteRepository(appContext),
+                    favorites = preferences,
+                    settings = preferences,
                     metadata = CachingSrMetadataProvider(HttpSrMetadataProvider()),
                     castController = CastController(appContext),
                 )
@@ -43,6 +45,7 @@ class MainActivity : AppCompatActivity() {
                     castState = castState,
                     onPlay = model::play,
                     onToggleFavorite = model::toggleFavorite,
+                    onSetDefaultP4 = model::setDefaultP4,
                     onTogglePlayback = model::togglePlayback,
                     onStop = model::stop,
                 )

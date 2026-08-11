@@ -3,18 +3,65 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>RadioApp Receiver</title>
+    <title>RadioApp</title>
     <link rel="icon" href="%BASE_URL%assets/radioapp-channel.svg" />
     <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
   </head>
   <body>
     <cast-media-player></cast-media-player>
-    <main id="browser-fallback" aria-live="polite">
-      <div class="brand">Sveriges Radio</div>
-      <h1>RadioApp Receiver</h1>
-      <p id="receiver-status">Startar…</p>
-      <p id="metadata-preview">Välj en kanal för att lyssna i browserläget.</p>
-      <div id="channel-preview"></div>
+    <main id="browser-fallback">
+      <header class="top-bar">
+        <a class="identity" href="#top" aria-label="RadioApp, gå till toppen">
+          <span class="identity-mark" aria-hidden="true">R</span>
+          <span>RadioApp</span>
+        </a>
+        <span id="receiver-status" class="dev-label">Webbläge · inte Cast</span>
+      </header>
+
+      <div id="top" class="browser-layout">
+        <section class="now-playing" aria-labelledby="now-heading" aria-live="polite">
+          <img id="now-artwork" src="%BASE_URL%assets/radioapp-channel.svg" alt="RadioApp" />
+          <div class="now-copy">
+            <p class="eyebrow">Spelas nu</p>
+            <h1 id="now-channel">Ingen kanal spelas</h1>
+            <p id="now-program" class="program-name">Välj en kanal för att börja lyssna</p>
+            <p id="now-description" class="program-description" hidden></p>
+            <div id="now-live-row" class="live-row" hidden>
+              <span class="live-badge"><span aria-hidden="true"></span>LIVE</span>
+              <span id="now-time"></span>
+            </div>
+            <div id="now-next" class="next-program" hidden></div>
+          </div>
+        </section>
+
+        <section class="content-section" aria-labelledby="favorites-heading">
+          <div class="section-heading">
+            <div><p class="eyebrow">Snabbval</p><h2 id="favorites-heading">Favoriter</h2></div>
+          </div>
+          <div id="favorite-preview" class="channel-grid favorite-grid"></div>
+        </section>
+
+        <div class="catalog-columns">
+          <section class="content-section" aria-labelledby="national-heading">
+            <div class="section-heading"><h2 id="national-heading">Nationella</h2></div>
+            <div id="national-preview" class="channel-list"></div>
+          </section>
+
+          <section class="content-section p4-section" aria-labelledby="p4-heading">
+            <div class="section-heading">
+              <div><p class="eyebrow">25 regioner</p><h2 id="p4-heading">P4 lokalt</h2></div>
+              <button id="p4-toggle" class="quiet-button" type="button" aria-expanded="false" aria-controls="p4-preview">Visa alla</button>
+            </div>
+            <div id="p4-default"></div>
+            <div id="p4-preview" class="channel-list p4-list" hidden></div>
+          </section>
+        </div>
+
+        <section class="content-section" aria-labelledby="other-heading">
+          <div class="section-heading"><h2 id="other-heading">Övriga kanaler</h2></div>
+          <div id="other-preview" class="channel-grid"></div>
+        </section>
+      </div>
     </main>
     <div id="error-overlay" role="alert" hidden></div>
     <script type="module" src="/src/main.ts"></script>
