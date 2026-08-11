@@ -26,8 +26,8 @@ On a temporary API failure, cached metadata may be reused only until the earlier
 
 ## CORS
 
-On 2026-08-11, requests carrying `Origin: https://viktorjonsson77.github.io` to both `channels` and `scheduledepisodes/rightnow` returned HTTP 200 and `Access-Control-Allow-Origin: *`. The right-now response advertised `Cache-Control: public,max-age=10`. Browser/receiver access therefore needs no backend or proxy. Physical Cast runtime behavior is still **REAL CAST DEVICE NOT YET VERIFIED**.
+On 2026-08-11, requests carrying `Origin: https://viktorjonsson77.github.io` to both `channels` and `scheduledepisodes/rightnow` returned HTTP 200 and `Access-Control-Allow-Origin: *`. The right-now response advertised `Cache-Control: public,max-age=10`. The latest smoke run returned P3's current program `P3 Musik` with both start and end fields. Browser/receiver access therefore needs no backend or proxy: **RECEIVER_METADATA_DIRECT_SUPPORTED**. Direct metadata refresh inside the Custom Receiver Cast runtime remains real-device unverified.
 
 ## Deterministic tests and live smoke test
 
-Fixtures cover current/next parsing, missing image/description, malformed shape, network failure, timeout, fresh cache and stale fallback. Unit tests never call SR. The optional `node tools/sr-live-smoke-test.mjs` separately checks every stream, P3's current response shape and CORS.
+Fixtures cover current/next parsing, missing next/image/description, malformed shape, network failure, timeout, fresh cache, bounded stale fallback and stale expiry. Unit tests never call SR. The optional `node tools/sr-live-smoke-test.mjs` separately checks every stream, P3's current response shape and CORS and labels its output `LIVE_EXTERNAL_TEST`.

@@ -60,6 +60,8 @@ fixtures for deterministic tests. Playback starts before metadata work.
 
 The catalog includes the 36 named live services on SR's public stream page and
 does not import API-only extra/event channels. All defaults are HTTPS AAC-LC 128.
+The official stream page and channel API were re-audited on 2026-08-11; the
+generator reproduced the checked-in catalog without differences.
 
 ## D011 — Bounded program-aware cache
 

@@ -64,6 +64,8 @@ function parseChannel(value: unknown): Channel {
   }
   if (!qualities.has(String(value.streamQuality)) || !formats.has(String(value.streamFormat)) ||
       !categories.has(String(value.category))) throw new Error(`Invalid enum in ${value.id as string}`);
+  const expectedFormat = value.streamQuality === "MP3_96" ? "MP3" : "AAC";
+  if (value.streamFormat !== expectedFormat) throw new Error(`Stream quality/format mismatch in ${value.id as string}`);
   if (!Number.isInteger(value.srChannelId) || Number(value.srChannelId) <= 0) throw new Error(`Invalid srChannelId in ${value.id as string}`);
   if (typeof value.isLocal !== "boolean" || typeof value.isFavoriteCapable !== "boolean") {
     throw new Error(`Invalid flags in ${value.id as string}`);

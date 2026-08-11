@@ -21,6 +21,15 @@ describe("channel catalog", () => {
     expect(contentType(parseChannelCatalog(fixture).channels[0]!)).toBe("audio/aac");
   });
 
+  it("keeps the registry model ready for official alternate stream qualities", () => {
+    const alternate = structuredClone(fixture);
+    alternate.channels[0].streamUrl = "https://live1.sr.se/p1-mp3-96";
+    alternate.channels[0].streamQuality = "MP3_96";
+    alternate.channels[0].streamFormat = "MP3";
+
+    expect(contentType(parseChannelCatalog(alternate).channels[0]!)).toBe("audio/mpeg");
+  });
+
   it("rejects non-SR and non-HTTPS stream URLs", () => {
     const invalid = structuredClone(fixture);
     invalid.channels[0].streamUrl = "http://example.com/radio";
@@ -34,5 +43,12 @@ describe("channel catalog", () => {
     const regionless = structuredClone(fixture);
     regionless.channels.find((channel: any) => channel.category === "LOCAL_P4").region = null;
     expect(() => parseChannelCatalog(regionless)).toThrow(/P4 region/);
+  });
+
+  it("rejects mismatched stream quality and format", () => {
+    const mismatch = structuredClone(fixture);
+    mismatch.channels[0].streamQuality = "MP3_96";
+
+    expect(() => parseChannelCatalog(mismatch)).toThrow(/quality\/format mismatch/);
   });
 });

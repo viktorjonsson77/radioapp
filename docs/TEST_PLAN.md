@@ -10,9 +10,9 @@ npm ci
 npm run validate:channels
 ```
 
-The JSON Schema and semantic checks cover schema version, required fields, enum categories, 36 unique internal IDs, unique SR IDs, unique HTTPS streams, non-empty names and structured metadata for all 25 P4 regions.
+The JSON Schema and semantic checks cover schema version, required fields, all supported stream quality/format enums, expected category counts, stable core SR IDs, 36 unique internal IDs, unique SR IDs, unique HTTPS streams, non-empty names and structured metadata for all 25 P4 regions.
 
-Receiver `npm test` covers catalog parsing/rejection, category/P4 counts, current/next SR parsing, optional fields, malformed responses, network failure, timeout, cache/stale fallback, media/fallback images and the deterministic under-30 browse policy. `npm run build` performs strict TypeScript and Vite production build with base `/radioapp/`.
+Receiver `npm test` covers catalog parsing/rejection, category/P4 counts, alternate quality mapping, current/next and missing-next SR parsing, optional fields, malformed responses, network failure, timeout, cache/stale fallback and expiry, media/fallback images and the deterministic under-30 browse policy. `npm run build` performs strict TypeScript and Vite production build with base `/radioapp/`.
 
 Android `./gradlew test` covers asset repository parsing/lookups, SR IDs/regions, metadata parsing/current/next/optional fields, network failure, timeout, cache/stale fallback, favorites, missing old favorite presentation, default P4 and Cast live-media mapping. `./gradlew lintDebug` and `./gradlew assembleDebug` verify the application artifact.
 

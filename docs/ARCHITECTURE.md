@@ -29,7 +29,9 @@ The temporary branch does not execute or validate any receiver code in
 ## Shared content layer
 
 - `shared/channels.json`: schema-v2 catalog with stable internal IDs, numeric SR IDs, structured P4 region data, official streams and channel images.
-- `shared/channels.schema.json`: machine-readable JSON Schema.
+- `shared/channels.schema.json`: machine-readable JSON Schema. Runtime defaults
+  remain AAC 128; the model also validates SR's AAC 32, AAC 320 and MP3 96
+  alternatives without exposing a quality-settings UI.
 - Android packages `shared/` as assets; receiver build syncs the catalog into `public/generated/`.
 - `tools/generate-channel-catalog.mjs`, `tools/validate-streams.mjs` and `tools/sr-live-smoke-test.mjs` keep official-source checks repeatable.
 
@@ -38,7 +40,7 @@ The temporary branch does not execute or validate any receiver code in
 - `data/channel`: strict asset parsing, uniqueness and regional consistency.
 - `data/metadata`: SR HTTP adapter, raw-shape parser and bounded cache decorator.
 - `domain`: channel, region, normalized now-playing/next-program models and repository/provider contracts.
-- `ui`: favorites, national, expandable local P4 and other sections; selected-channel metadata refresh only.
+- `ui`: favorites, national, expandable local P4 and other sections; selected-channel metadata refresh only, including program description and current/next times when supplied.
 - `cast`: direct live MediaInfo with stable `radioapp://channel/<id>` entity and metadata fallback.
 - `cast/CastReceiverConfiguration`: central mode selection; CUSTOM is default,
   while DEFAULT resolves through Google's official SDK constant.

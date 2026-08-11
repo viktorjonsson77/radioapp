@@ -66,4 +66,16 @@ class CastMediaInfoMapperTest {
         assertEquals("P1", media.metadata?.getString(MediaMetadata.KEY_ARTIST))
         assertEquals("https://static-cdn.sr.se/images/program.jpg", media.metadata?.images?.first()?.url?.toString())
     }
+
+    @Test fun mapsPreparedOfficialMp3AlternativeContentType() {
+        val media = CastMediaInfoMapper.map(
+            p1.copy(
+                streamUrl = "https://live1.sr.se/p1-mp3-96",
+                streamQuality = StreamQuality.MP3_96,
+                streamFormat = StreamFormat.MP3,
+            ),
+        )
+
+        assertEquals("audio/mpeg", media.contentType)
+    }
 }

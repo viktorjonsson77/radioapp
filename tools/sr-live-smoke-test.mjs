@@ -2,6 +2,9 @@ import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+console.log("LIVE_EXTERNAL_TEST START");
+process.once("exit", (code) => console.log(`LIVE_EXTERNAL_TEST ${code === 0 ? "PASS" : "FAIL"}`));
+
 const root = process.cwd();
 const catalog = JSON.parse(await readFile(resolve(root, "shared/channels.json"), "utf8"));
 

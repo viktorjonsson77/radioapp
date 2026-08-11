@@ -4,6 +4,8 @@ import android.content.Context
 import kotlinx.serialization.json.Json
 import se.radioapp.app.domain.model.Channel
 import se.radioapp.app.domain.model.ChannelCatalog
+import se.radioapp.app.domain.model.StreamFormat
+import se.radioapp.app.domain.model.StreamQuality
 import se.radioapp.app.domain.repository.ChannelRepository
 
 class AssetChannelRepository(
@@ -32,6 +34,10 @@ class AssetChannelRepository(
                     if (channel.category.name == "LOCAL_P4") channel.region != null && channel.isLocal
                     else channel.region == null && !channel.isLocal
                 }) { "P4 regional metadata is inconsistent" }
+                require(catalog.channels.all { channel ->
+                    if (channel.streamQuality == StreamQuality.MP3_96) channel.streamFormat == StreamFormat.MP3
+                    else channel.streamFormat == StreamFormat.AAC
+                }) { "Stream quality and format are inconsistent" }
             }.channels.also { cache = it }
         }
     }

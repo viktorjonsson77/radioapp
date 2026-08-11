@@ -58,6 +58,13 @@ class SrMetadataProviderTest {
         assertNull(SrMetadataParser.parse(Json.parseToJsonElement("{}").jsonObject, "p3", Instant.EPOCH))
     }
 
+    @Test fun acceptsDocumentedResponseWithoutNextProgram() {
+        val response = """{"channel":{"currentscheduledepisode":{"title":"P3 Musik"}}}"""
+        val result = SrMetadataParser.parse(Json.parseToJsonElement(response).jsonObject, "p3", Instant.EPOCH)!!
+
+        assertNull(result.nextProgram)
+    }
+
     @Test fun networkAndTimeoutAreResultFailures() = runTest {
         val offline = HttpSrMetadataProvider(SrApiClient { throw IllegalStateException("offline") })
         assertTrue(offline.nowPlaying(channel).isFailure)

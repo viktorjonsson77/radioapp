@@ -1,6 +1,8 @@
 # Channel catalog
 
-Catalog snapshot: 2026-08-11. Total: **36**.
+Catalog snapshot and official-source re-audit: 2026-08-11. Total: **36**. The
+official stream page and SR channel API reproduced the checked-in catalog
+without differences.
 
 ## Categories
 

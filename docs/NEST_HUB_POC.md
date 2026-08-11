@@ -1,6 +1,6 @@
 # Nest Hub and Cast Media Browse PoC
 
-Sources checked for this PoC:
+Sources rechecked on 2026-08-11 for this PoC:
 
 - [Cast Media Browse](https://developers.google.com/cast/docs/web_receiver/media-browse)
 - [Optimize for Smart Displays](https://developers.google.com/cast/docs/web_receiver/optimize-smart-displays)
@@ -65,7 +65,7 @@ allow supported branding, but do not turn Media Browse into arbitrary HTML.
 The following remain unverified until a registered physical Nest Hub is used:
 
 - receiver launch and persistence;
-- SR AAC response/CORS/codec behavior in the device runtime;
+- full-catalog AAC behavior and direct SR metadata/CORS inside the Custom Receiver runtime (P1, P3 and P4 Malmöhus audio is verified separately with Google Default Media Receiver);
 - actual Media Browse landing and swipe-up rendering;
 - touch selection producing LOAD and changing channels;
 - play/pause/stop behavior on the Hub surface;

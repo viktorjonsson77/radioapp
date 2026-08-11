@@ -52,6 +52,13 @@ describe("receiver metadata", () => {
     expect(result?.programDescription).toBeNull();
   });
 
+  it("accepts a documented response without a next program", () => {
+    const withoutNext = structuredClone(fixture);
+    delete (withoutNext.channel as any).nextscheduledepisode;
+
+    expect(parseSrRightNow(withoutNext, "p3")?.nextProgram).toBeNull();
+  });
+
   it("returns no metadata for malformed or empty responses", () => {
     expect(parseSrRightNow({ channel: { currentscheduledepisode: { title: "" } } }, "p3")).toBeNull();
     expect(parseSrRightNow("not-json-shape", "p3")).toBeNull();
@@ -81,6 +88,18 @@ describe("receiver metadata", () => {
     now = new Date("2026-08-11T06:06:00Z");
     expect((await provider.nowPlaying(p3))?.programName).toBe("Morgonpasset i P3");
     expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not serve stale metadata beyond the bounded stale window", async () => {
+    let now = new Date("2026-08-11T06:00:00Z");
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(fixture), { status: 200 }))
+      .mockRejectedValueOnce(new Error("network"));
+    const provider = new SrMetadataProvider(fetcher, () => now);
+    await provider.nowPlaying(p3);
+
+    now = new Date("2026-08-11T08:03:00Z");
+    await expect(provider.nowPlaying(p3)).rejects.toThrow("network");
   });
 
   it("surfaces network failure and timeout without manufacturing metadata", async () => {

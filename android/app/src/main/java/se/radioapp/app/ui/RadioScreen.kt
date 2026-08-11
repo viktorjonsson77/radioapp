@@ -214,6 +214,14 @@ private fun NowPlaying(state: CastUiState, uiState: RadioUiState, onTogglePlayba
                     Text(program?.programName ?: "Sveriges Radio", color = Color.White.copy(alpha = 0.92f))
                     program?.let { metadata ->
                         val formatter = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault())
+                        metadata.programDescription?.let { description ->
+                            Text(
+                                description,
+                                color = Color.White.copy(alpha = 0.82f),
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 2,
+                            )
+                        }
                         if (metadata.startsAt != null && metadata.endsAt != null) {
                             Text("${formatter.format(metadata.startsAt)}–${formatter.format(metadata.endsAt)}", color = Color.White.copy(alpha = 0.76f))
                         }

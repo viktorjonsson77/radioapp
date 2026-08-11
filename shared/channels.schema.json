@@ -26,6 +26,13 @@
     "channel": {
       "type": "object",
       "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "streamQuality": { "const": "MP3_96" } } },
+          "then": { "properties": { "streamFormat": { "const": "MP3" } } },
+          "else": { "properties": { "streamFormat": { "const": "AAC" } } }
+        }
+      ],
       "required": ["id", "srChannelId", "name", "shortName", "description", "streamUrl", "streamQuality", "streamFormat", "imageUrl", "category", "region", "isLocal", "isFavoriteCapable"],
       "properties": {
         "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
@@ -34,9 +41,14 @@
         "shortName": { "type": "string", "minLength": 1 },
         "description": { "type": "string", "minLength": 1 },
         "streamUrl": { "type": "string", "pattern": "^https://live1\\.sr\\.se/[a-z0-9-]+$" },
-        "streamQuality": { "enum": ["AAC_128"] },
-        "streamFormat": { "enum": ["AAC"] },
-        "imageUrl": { "type": "string", "pattern": "^https://" },
+        "streamQuality": { "enum": ["AAC_32", "AAC_128", "AAC_320", "MP3_96"] },
+        "streamFormat": { "enum": ["AAC", "MP3"] },
+        "imageUrl": {
+          "oneOf": [
+            { "type": "string", "pattern": "^https://" },
+            { "type": "null" }
+          ]
+        },
         "category": { "enum": ["NATIONAL", "LOCAL_P4", "NEWS", "MUSIC", "DIGITAL", "LANGUAGE", "CHILDREN"] },
         "region": { "oneOf": [{ "$ref": "#/$defs/region" }, { "type": "null" }] },
         "isLocal": { "type": "boolean" },
