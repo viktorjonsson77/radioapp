@@ -12,7 +12,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import se.radioapp.app.cast.CastController
 import se.radioapp.app.data.channel.AssetChannelRepository
 import se.radioapp.app.data.favorites.DataStoreFavoriteRepository
-import se.radioapp.app.data.metadata.FixtureSrMetadataProvider
+import se.radioapp.app.data.metadata.CachingSrMetadataProvider
+import se.radioapp.app.data.metadata.HttpSrMetadataProvider
 import se.radioapp.app.ui.RadioScreen
 import se.radioapp.app.ui.RadioViewModel
 import se.radioapp.app.ui.theme.RadioTheme
@@ -27,7 +28,7 @@ class MainActivity : ComponentActivity() {
                 RadioViewModel(
                     channels = AssetChannelRepository(appContext),
                     favorites = DataStoreFavoriteRepository(appContext),
-                    metadata = FixtureSrMetadataProvider(),
+                    metadata = CachingSrMetadataProvider(HttpSrMetadataProvider()),
                     castController = CastController(appContext),
                 )
             }

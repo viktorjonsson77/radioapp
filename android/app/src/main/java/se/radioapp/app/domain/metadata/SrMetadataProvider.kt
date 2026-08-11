@@ -1,7 +1,8 @@
 package se.radioapp.app.domain.metadata
 
-import se.radioapp.app.domain.model.ProgramMetadata
+import se.radioapp.app.domain.model.Channel
+import se.radioapp.app.domain.model.NowPlayingMetadata
 
-interface SrMetadataProvider {
-    suspend fun nowPlaying(channelId: String): Result<ProgramMetadata?>
+fun interface SrMetadataProvider {
+    suspend fun nowPlaying(channel: Channel): Result<NowPlayingMetadata?>
 }

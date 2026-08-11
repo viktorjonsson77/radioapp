@@ -10,9 +10,9 @@ html, body { margin: 0; min-height: 100%; }
 cast-media-player {
   --background-color: #fff8f5;
   --background-image: linear-gradient(145deg, #fff8f5 0%, #f7e4e1 100%);
-  --splash-image: url('/assets/radioapp-channel.svg');
+  --splash-image: url('/radioapp/assets/radioapp-channel.svg');
   --splash-size: 28%;
-  --logo-image: url('/assets/radioapp-channel.svg');
+  --logo-image: url('/radioapp/assets/radioapp-channel.svg');
   --logo-size: 72px;
   --progress-color: #d71920;
 }
@@ -27,7 +27,7 @@ cast-media-player {
 h1 { margin: .3em 0 .15em; font-size: clamp(2.5rem, 8vw, 6rem); }
 #receiver-status { color: #6c5654; font-size: 1.2rem; }
 #channel-preview { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
-.preview-card { padding: 16px 20px; border-radius: 18px; background: white; box-shadow: 0 8px 30px #51201a12; font-weight: 700; }
+.preview-card { border: 0; padding: 16px 20px; border-radius: 18px; color: inherit; background: white; box-shadow: 0 8px 30px #51201a12; font: inherit; font-weight: 700; cursor: pointer; }
 
 #error-overlay {
   position: fixed;

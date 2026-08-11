@@ -20,6 +20,7 @@ class CastMediaInfoMapperTest {
         val media = CastMediaInfoMapper.map(
             Channel(
                 id = "p3",
+                srChannelId = 164,
                 name = "P3",
                 shortName = "P3",
                 description = "Music",
@@ -35,6 +36,7 @@ class CastMediaInfoMapperTest {
         assertEquals(MediaInfo.STREAM_TYPE_LIVE, media.streamType)
         assertEquals("audio/aac", media.contentType)
         assertEquals("https://live1.sr.se/p3-aac-128", media.contentId)
+        assertEquals("radioapp://channel/p3", media.entity)
         assertEquals("P3", media.metadata?.getString(MediaMetadata.KEY_TITLE))
         assertEquals("Sveriges Radio", media.metadata?.getString(MediaMetadata.KEY_ARTIST))
     }

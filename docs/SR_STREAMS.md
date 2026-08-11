@@ -1,36 +1,23 @@
 # Sveriges Radio streams
 
-All PoC URLs were verified on 2026-08-11 against Sveriges Radio's official
-[Länkar till ljudströmmar](https://om.sverigesradio.se/lankar-till-ljudstrommar-for-alla-kanaler)
-page. That page publishes HTTPS AAC 32/128/320 kbps and MP3 96 kbps links and
-identifies 128 kbps as AAC-LC.
+RadioApp uses only the current official [SR stream list](https://om.sverigesradio.se/lankar-till-ljudstrommar-for-alla-kanaler). The catalog was refreshed on 2026-08-11 and contains 36 live channels: 3 national channels, 25 local P4 channels and 8 other live channels. AAC-LC 128 kbps over HTTPS is the default for every entry.
 
-| Channel | Canonical ID | AAC 128 URL |
-|---|---|---|
-| P1 | `p1` | `https://live1.sr.se/p1-aac-128` |
-| P2 | `p2` | `https://live1.sr.se/p2-aac-128` |
-| P3 | `p3` | `https://live1.sr.se/p3-aac-128` |
-| P4 Malmöhus | `p4-malmo` | `https://live1.sr.se/p4malm-aac-128` |
-| P4 Kristianstad | `p4-kristianstad` | `https://live1.sr.se/p4krist-aac-128` |
+`shared/channels.json` is the canonical runtime catalog. `shared/channels.schema.json` defines schema version 2. `tools/generate-channel-catalog.mjs` cross-checks the configured mapping against both the official stream page and SR's channel API before regenerating the catalog. Regeneration is an explicit maintenance operation because changes to stable internal IDs must be reviewed.
 
-`shared/channels.json` is authoritative in the codebase. The current format and
-quality are `AAC` / `AAC_128`; enums already reserve AAC 32, AAC 320 and MP3 96.
-SR's optional latency query is not added in this PoC so device behavior can first
-be measured against the canonical URL.
+## Validation
 
-On 2026-08-11, `tools/validate-streams.mjs` received HTTP 200 for all five URLs.
-Following SR's redirect, each endpoint reported `Content-Type: audio/aac` and
-`Access-Control-Allow-Origin: *`. This verifies current HTTP reachability and
-supports the chosen mapping; it is not a Cast playback/device test.
+Run from the repository root:
 
-The receiver schema rejects HTTP and non-`live1.sr.se` stream hosts. This is a
-PoC safety check, not a permanent assertion that SR can never change hostnames;
-future official changes require source verification and a reviewed schema update.
+```bash
+cd receiver
+npm ci
+npm run validate:channels
+cd ..
+node tools/validate-streams.mjs
+```
 
-## Metadata
+The stream validator uses a bounded GET with a one-byte Range request, a 12-second timeout and concurrency three. It immediately cancels the response body after headers. It checks HTTPS, HTTP 2xx/206, an AAC-compatible content type, an SR-owned final host and an unchanged channel path after redirects. It never downloads a live stream in full.
 
-Playback currently uses channel metadata and a non-blocking
-`SrMetadataProvider` fixture returning no program. A future SR API adapter should
-map current/next scheduled episode, program image and start/end instants. It must
-use timeouts/cache and return `Result` so any API outage degrades metadata only.
-No API key is invented or required by the current build.
+Live result on 2026-08-11: **36/36 HTTP 200**, `Content-Type: audio/aac`. Canonical `live1.sr.se` requests redirected to `edge1.sr.se` or `edge2.sr.se` while preserving the expected channel path. This is HTTP reachability only, not Cast playback verification.
+
+SR Extra event channels are not included because they are absent from the official public stream list. P2 Musik and P4 Södertälje are not treated as separate streams for the same reason. The official `P4 Digital` stream maps to SR channel ID 5283, whose channel API entry currently has the legacy display name `P4 Södertälje` and describes digital event broadcasts.

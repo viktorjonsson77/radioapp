@@ -21,7 +21,7 @@ to the full SR list mechanical.
 
 ## D004 — AAC 128 default
 
-SR officially publishes AAC-LC 128 kbps for all five PoC channels and Google
+SR officially publishes AAC-LC 128 kbps for all supported live channels and Google
 Cast lists LC-AAC support. Quality/format enums keep later options explicit.
 
 ## D005 — Compose + modest layering, no DI framework
@@ -50,7 +50,30 @@ default receiver ID so the app can build and render its standard Cast component,
 but RadioApp blocks stream loading with a clear configuration error. This avoids
 claiming the custom receiver is active.
 
-## D009 — Metadata fixture first
+## D009 — SR right-now metadata adapter
 
-`SrMetadataProvider` exists, but playback does not wait on network metadata. A
-real SR adapter follows after stream and Hub browse behavior are proven.
+The documented `scheduledepisodes/rightnow` method directly returns current and
+next scheduled episodes. Both runtimes normalize it behind a provider and keep
+fixtures for deterministic tests. Playback starts before metadata work.
+
+## D010 — Complete official stream-list scope
+
+The catalog includes the 36 named live services on SR's public stream page and
+does not import API-only extra/event channels. All defaults are HTTPS AAC-LC 128.
+
+## D011 — Bounded program-aware cache
+
+Refresh occurs near program end with 30-second/5-minute bounds. A short stale
+window improves resilience without displaying an old program indefinitely.
+
+## D012 — Deterministic Media Browse subset
+
+Google still documents one `BrowseContent` list with at most 30 items. Landing
+browse contains the three development favorites. In-player browse contains all
+non-local channels plus default P4 Malmöhus (12 items). Android/browser mode
+expose all 36. This clear policy is preferred to arbitrary truncation.
+
+## D013 — Direct receiver metadata over CORS
+
+SR returned wildcard CORS to the deployed GitHub Pages origin, so receiver-side
+refresh needs no proxy. Failure falls back locally and never affects audio.

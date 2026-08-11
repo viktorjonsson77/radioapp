@@ -15,10 +15,23 @@ class AssetChannelRepository(
     override suspend fun getChannels(): List<Channel> = cache ?: synchronized(this) {
         cache ?: context.assets.open(CHANNEL_FILE).bufferedReader().use { reader ->
             json.decodeFromString<ChannelCatalog>(reader.readText()).also { catalog ->
-                require(catalog.schemaVersion == 1) { "Unsupported channel schema ${catalog.schemaVersion}" }
+                require(catalog.schemaVersion == 2) { "Unsupported channel schema ${catalog.schemaVersion}" }
                 require(catalog.channels.map(Channel::id).distinct().size == catalog.channels.size) {
                     "Channel IDs must be unique"
                 }
+                require(catalog.channels.map(Channel::srChannelId).distinct().size == catalog.channels.size) {
+                    "SR channel IDs must be unique"
+                }
+                require(catalog.channels.map(Channel::streamUrl).distinct().size == catalog.channels.size) {
+                    "Stream URLs must be unique"
+                }
+                require(catalog.channels.all { it.name.isNotBlank() && it.streamUrl.startsWith("https://live1.sr.se/") }) {
+                    "Channels must have names and official HTTPS streams"
+                }
+                require(catalog.channels.all { channel ->
+                    if (channel.category.name == "LOCAL_P4") channel.region != null && channel.isLocal
+                    else channel.region == null && !channel.isLocal
+                }) { "P4 regional metadata is inconsistent" }
             }.channels.also { cache = it }
         }
     }

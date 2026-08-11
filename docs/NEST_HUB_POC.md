@@ -23,10 +23,10 @@ canonical SR URL and live metadata, and returns it to CAF. The Hub therefore can
 switch channels without the Android sender remaining connected, while the Web
 Receiver session remains alive.
 
-## Implemented PoC
+## Implemented content-layer policy
 
 - Landing carousel: **Favoriter** — P1, P3 and P4 Malmöhus.
-- In-player carousel: **Kanaler** — P1, P2, P3, P4 Malmöhus and P4 Kristianstad.
+- In-player carousel: **Utvalda kanaler** — all 11 non-local live channels plus default P4 Malmöhus (12 total).
 - Each item is marked LIVE and uses square artwork.
 - LOAD interceptor resolves entities using the locally loaded shared catalog.
 - `TOUCH_INPUT_SUPPORTED` is read from `getDeviceCapabilities()` after READY and
@@ -47,8 +47,8 @@ allow supported branding, but do not turn Media Browse into arbitrary HTML.
   documents no root-item/container/category tree and no simultaneous Favoriter +
   Kanaler sections. The PoC uses the two official entry points instead of
   pretending unsupported hierarchy exists.
-- Maximum item count is 30. A future complete SR catalog must select/partition
-  content within supported UX instead of sending an unbounded list.
+- Maximum item count is 30. The complete 36-channel catalog therefore uses the
+  deterministic subset above. Android and browser mode expose all channels.
 - The sender is required to discover and initially launch an unpublished
   receiver. It is not required for BrowseItem LOAD handling after launch.
 - A receiver is not guaranteed to run forever without a sender. Device/session

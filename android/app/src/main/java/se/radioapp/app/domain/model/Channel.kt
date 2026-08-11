@@ -11,6 +11,7 @@ data class ChannelCatalog(
 @Serializable
 data class Channel(
     val id: String,
+    val srChannelId: Int,
     val name: String,
     val shortName: String,
     val description: String,
@@ -19,10 +20,13 @@ data class Channel(
     val streamFormat: StreamFormat,
     val imageUrl: String? = null,
     val category: ChannelCategory,
-    val region: String? = null,
+    val region: ChannelRegion? = null,
     val isLocal: Boolean,
     val isFavoriteCapable: Boolean,
 )
+
+@Serializable
+data class ChannelRegion(val name: String, val slug: String)
 
 @Serializable
 enum class StreamQuality { AAC_32, AAC_128, AAC_320, MP3_96 }
@@ -31,4 +35,4 @@ enum class StreamQuality { AAC_32, AAC_128, AAC_320, MP3_96 }
 enum class StreamFormat { AAC, MP3 }
 
 @Serializable
-enum class ChannelCategory { NATIONAL, LOCAL_P4 }
+enum class ChannelCategory { NATIONAL, LOCAL_P4, NEWS, MUSIC, DIGITAL, LANGUAGE, CHILDREN }

@@ -2,11 +2,13 @@ import "./style.css";
 import { Channel, loadChannels } from "./channel";
 import { createBrowsePlan } from "./browse/catalog";
 import { toCastBrowseContent } from "./browse/castBrowse";
-import { channelIdFromEntity, mapChannelToMedia } from "./metadata";
+import { channelIdFromEntity, mapChannelToMedia, metadataRefreshDelayMs, SrMetadataProvider } from "./metadata";
 
 const status = document.querySelector<HTMLElement>("#receiver-status");
 const preview = document.querySelector<HTMLElement>("#channel-preview");
 const errorOverlay = document.querySelector<HTMLElement>("#error-overlay");
+const metadataPreview = document.querySelector<HTMLElement>("#metadata-preview");
+const metadataProvider = new SrMetadataProvider();
 
 function log(event: string, data?: unknown): void {
   data === undefined ? console.info(`[RadioApp Receiver] ${event}`) : console.info(`[RadioApp Receiver] ${event}`, data);
@@ -19,11 +21,23 @@ function showError(message: string): void {
 
 function showBrowserPreview(channels: Channel[]): void {
   if (status) status.textContent = "Browserläge – inte en Cast-emulator";
+  const audio = new Audio();
   if (preview) {
     preview.replaceChildren(...channels.map((channel) => {
-      const card = document.createElement("div");
+      const card = document.createElement("button");
       card.className = "preview-card";
       card.textContent = channel.name;
+      card.addEventListener("click", async () => {
+        audio.src = channel.streamUrl;
+        void audio.play().catch((error) => showError(`Browser playback failed: ${String(error)}`));
+        if (metadataPreview) metadataPreview.textContent = `${channel.name} · Sveriges Radio · LIVE`;
+        try {
+          const program = await metadataProvider.nowPlaying(channel);
+          if (metadataPreview && program) metadataPreview.textContent = `${channel.name} · ${program.programName} · LIVE`;
+        } catch (error) {
+          log("browser metadata fallback", error);
+        }
+      });
       return card;
     }));
   }
@@ -53,6 +67,31 @@ async function bootstrap(): Promise<void> {
   const plan = createBrowsePlan(channels, undefined, artworkUrl);
   const playerData = new cast.framework.ui.PlayerData();
   const playerDataBinder = new cast.framework.ui.PlayerDataBinder(playerData);
+  let metadataTimer: number | undefined;
+  let activeMetadataChannelId: string | null = null;
+
+  const scheduleMetadata = (channel: Channel): void => {
+    if (metadataTimer !== undefined) window.clearTimeout(metadataTimer);
+    activeMetadataChannelId = channel.id;
+    const refresh = async (): Promise<void> => {
+      let delay = 120_000;
+      try {
+        const program = await metadataProvider.nowPlaying(channel);
+        delay = metadataRefreshDelayMs(program);
+        const media = playerManager.getMediaInformation();
+        if (media?.entity === `radioapp://channel/${channel.id}`) {
+          media.metadata = mapChannelToMedia(channel, artworkUrl, program).metadata;
+          playerManager.broadcastStatus(true);
+          log("metadata updated", { channel: channel.id, program: program?.programName });
+        } else delay = 1_000;
+      } catch (error) {
+        log("metadata unavailable; using channel fallback", error);
+      }
+      if (activeMetadataChannelId !== channel.id) return;
+      metadataTimer = window.setTimeout(() => void refresh(), delay);
+    };
+    void refresh();
+  };
 
   controls.setBrowseContent(toCastBrowseContent(plan.landing));
 
@@ -60,7 +99,11 @@ async function bootstrap(): Promise<void> {
     log(`player state: ${String(event.value)}`);
     if (event.value === cast.framework.ui.State.PLAYING) log("play");
     if (event.value === cast.framework.ui.State.PAUSED) log("pause");
-    if (event.value === cast.framework.ui.State.IDLE) log("stop");
+    if (event.value === cast.framework.ui.State.IDLE) {
+      log("stop");
+      activeMetadataChannelId = null;
+      if (metadataTimer !== undefined) window.clearTimeout(metadataTimer);
+    }
     const idle = event.value === cast.framework.ui.State.IDLE || event.value === cast.framework.ui.State.LAUNCHING;
     controls.setBrowseContent(toCastBrowseContent(idle ? plan.landing : plan.inPlayer));
   });
@@ -73,6 +116,7 @@ async function bootstrap(): Promise<void> {
       const channel = channels.find((candidate) => candidate.id === channelId);
       if (!channel) throw new Error(`Unknown browse entity: ${entity}`);
       request.media = { ...request.media, ...mapChannelToMedia(channel, artworkUrl) };
+      scheduleMetadata(channel);
     }
     return request;
   });

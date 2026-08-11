@@ -30,7 +30,7 @@ Receiver (Node.js 20+):
 
 ```bash
 cd receiver
-npm install
+npm ci
 npm run dev
 npm test
 npm run build
@@ -55,7 +55,14 @@ device-test instructions.
 
 ## Current verification boundary
 
-- Build and local unit tests can verify schemas, mappings and artifacts.
+- The shared catalog currently contains 36 official SR live channels, including
+  all 25 regional P4 services. Android and receiver use SR's documented
+  right-now API with bounded cache and metadata-independent playback.
+- Build and local unit tests verify schemas, mappings, fallbacks and artifacts.
 - A real registered Cast/Nest Hub is required to verify discovery, launch,
   receiver playback, Media Browse, touch, CORS behavior and session persistence.
 - No real-device verification is claimed by this repository.
+
+`EXTERNAL_BLOCKER`: Google Cast Developer Console identity/payment verification
+currently prevents developer registration. This is not a code, build or
+architecture failure. **REAL CAST DEVICE NOT YET VERIFIED.**

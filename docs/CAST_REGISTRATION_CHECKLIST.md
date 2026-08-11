@@ -1,5 +1,10 @@
 # First Nest Hub registration checklist
 
+> **EXTERNAL_BLOCKER:** Google Cast Developer Console identity/payment
+> verification currently opens a blank page and prevents developer registration.
+> This is not a receiver, Android, build or architecture failure. No code
+> workaround or fabricated Application ID is used.
+
 This checklist prepares the first physical test. Completing it does not by
 itself verify Cast behavior. Record the actual run in
 `test-results/REAL_DEVICE_TEST_TEMPLATE.md`.
@@ -111,7 +116,7 @@ unpublished Custom Receiver is accessible to registered development devices.
 - [ ] Connect to the Hub and play P1.
 - [ ] Verify audible AAC playback and the Hub's Now Playing metadata.
 - [ ] Open in-player Browse on the Hub (Google documents swipe up on smart
-      displays) and verify the five-channel list.
+      displays) and verify the deterministic 12-channel selected list.
 - [ ] Select P3 using Hub touch and verify that playback changes.
 - [ ] Close the Android app and verify whether playback continues.
 - [ ] While Android remains closed, attempt another Hub-only channel change.

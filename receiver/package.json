@@ -7,14 +7,16 @@
     "sync:shared": "node scripts/sync-shared.mjs",
     "predev": "npm run sync:shared",
     "dev": "vite --host 0.0.0.0",
-    "prebuild": "npm run sync:shared",
+    "prebuild": "npm run sync:shared && npm run validate:channels",
     "build": "tsc --noEmit && vite build",
-    "pretest": "npm run sync:shared",
+    "pretest": "npm run sync:shared && npm run validate:channels",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "validate:channels": "node scripts/validate-channels.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.30",
+    "ajv": "^8.17.1",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
     "vitest": "^3.2.3"

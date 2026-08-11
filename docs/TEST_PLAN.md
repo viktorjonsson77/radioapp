@@ -1,41 +1,31 @@
 # Test plan
 
-## Automated local tests
+## Deterministic local verification
 
-Android `./gradlew test`:
+Shared/schema:
 
-- canonical channel asset parsing and repository lookup;
-- official HTTPS host and channel ordering through repository assertions;
-- favorite add/remove set logic;
-- live AAC `MediaInfo` mapping with SR title/artist metadata.
+```bash
+cd receiver
+npm ci
+npm run validate:channels
+```
 
-Android `./gradlew assembleDebug` verifies manifest merge, CAF dependency,
-Compose compilation, resources, shared asset packaging and debug APK creation.
+The JSON Schema and semantic checks cover schema version, required fields, enum categories, 36 unique internal IDs, unique SR IDs, unique HTTPS streams, non-empty names and structured metadata for all 25 P4 regions.
 
-Receiver `npm test`:
+Receiver `npm test` covers catalog parsing/rejection, category/P4 counts, current/next SR parsing, optional fields, malformed responses, network failure, timeout, cache/stale fallback, media/fallback images and the deterministic under-30 browse policy. `npm run build` performs strict TypeScript and Vite production build with base `/radioapp/`.
 
-- strict channel catalog parsing and URL/schema rejection;
-- content type and live metadata mapping;
-- entity round trip;
-- landing favorites and in-player channel browse structure.
+Android `./gradlew test` covers asset repository parsing/lookups, SR IDs/regions, metadata parsing/current/next/optional fields, network failure, timeout, cache/stale fallback, favorites, missing old favorite presentation, default P4 and Cast live-media mapping. `./gradlew lintDebug` and `./gradlew assembleDebug` verify the application artifact.
 
-Receiver `npm run build` performs strict TypeScript checking and produces the
-static Vite artifact. `npm run dev` is for ordinary browser UI/data work only.
+## Optional live smoke verification
+
+```bash
+node tools/sr-live-smoke-test.mjs
+```
+
+This checks all stream headers with bounded requests, then P3 right-now response shape and browser-origin CORS. It is deliberately excluded from ordinary builds because live network state must not make deterministic tests fail.
 
 ## REAL_DEVICE_REQUIRED
 
-Record device model, firmware, receiver build commit and Android build variant in
-`test-results/` for each run. Verify:
+Record device, firmware, commit and APK hash in `test-results/`. Verify discovery, custom receiver launch, direct AAC playback, program/artwork updates, landing and in-player Browse, Hub touch LOAD, reconnect, sender disconnect, stop/restart/idle and API/stream failure behavior.
 
-1. standard Cast discovery and picker UX;
-2. Custom Receiver launch and ready log;
-3. direct P1/P2/P3/P4 AAC playback, startup time and stability;
-4. Android play, pause, stop, reconnect and session-loss UI;
-5. landing favorites before playback;
-6. swipe-up in-player channels during playback;
-7. touch channel change and LOAD interceptor logs;
-8. phone background, process kill and sender disconnect behavior;
-9. metadata/artwork and error overlay;
-10. audio-only Cast target behavior separately, if available.
-
-Automated tests must never be reported as physical Cast verification.
+Automated and browser tests must be reported as **BUILD VERIFIED** / **LOCAL TEST VERIFIED** only. Until registration succeeds: **REAL CAST DEVICE NOT YET VERIFIED**.

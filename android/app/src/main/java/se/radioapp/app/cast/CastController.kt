@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import se.radioapp.app.domain.model.Channel
-import se.radioapp.app.domain.model.ProgramMetadata
+import se.radioapp.app.domain.model.NowPlayingMetadata
 
 data class CastUiState(
     val connected: Boolean = false,
@@ -44,7 +44,7 @@ class CastController(context: Context) {
         sessionManager.currentCastSession?.takeIf { it.isConnected }?.let(::connected)
     }
 
-    fun playChannel(channel: Channel, program: ProgramMetadata? = null) {
+    fun playChannel(channel: Channel, program: NowPlayingMetadata? = null) {
         if (!CastOptionsProvider.isCustomReceiverConfigured) {
             failed("Custom receiver not configured")
             return

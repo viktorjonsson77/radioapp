@@ -3,63 +3,46 @@
 ## Runtime data flow
 
 ```text
-Sveriges Radio HTTPS live stream
-              |
-              v
-       Cast device / Nest Hub
-              ^
-              | direct media LOAD
-       Custom Web Receiver
-              ^
-              | CAF Cast session
-       Android sender app
+official SR AAC stream ───────────────> Cast device / Nest Hub
+                                                ^
+                                                | CAF media LOAD
+Android sender ───────────────> Custom Web Receiver
+     |                                  |
+     +── SR rightnow metadata API ──────+
 ```
 
-Metadata is separate from playback:
+The media URL in every LOAD is the official SR HTTPS URL. The Cast device fetches audio directly; Android is never an audio proxy. Metadata calls are independent and never gate LOAD, channel switching or controls.
 
-```text
-Sveriges Radio metadata API (future adapter)
-              |                    |
-              v                    v
-        Android sender       Web Receiver (only where useful)
-```
+## Shared content layer
 
-The phone sends the official `streamUrl` as live `MediaInfo`. The Cast receiver
-fetches the HTTPS audio itself. Metadata failure must never gate media loading.
-Once media is loaded, normal Cast reconnection/session behavior allows the phone
-app to be backgrounded or closed; the receiver is the player. This does not mean
-the Web Receiver runs forever: CAF/device idle and session lifecycle policies
-still apply and require device verification.
+- `shared/channels.json`: schema-v2 catalog with stable internal IDs, numeric SR IDs, structured P4 region data, official streams and channel images.
+- `shared/channels.schema.json`: machine-readable JSON Schema.
+- Android packages `shared/` as assets; receiver build syncs the catalog into `public/generated/`.
+- `tools/generate-channel-catalog.mjs`, `tools/validate-streams.mjs` and `tools/sr-live-smoke-test.mjs` keep official-source checks repeatable.
 
-## Modules and responsibilities
+## Android
 
-- `shared/channels.json`: the only channel catalog. Android packages it as an
-  asset. Receiver scripts copy it into the static artifact.
-- Android `data/`: asset parsing, DataStore favorites, settings and metadata
-  adapter implementation.
-- Android `domain/`: channel/program models and repository/provider contracts.
-- Android `cast/`: receiver selection, session observation and live MediaInfo.
-- Android `ui/`: Compose state and light Material 3 channel browser.
-- Receiver `channel.ts`: strict runtime schema and official-host validation.
-- Receiver `metadata.ts`: SR channel to CAF live-media mapping.
-- Receiver `browse/`: framework-neutral browse plan and CAF object adapter.
-- Receiver `main.ts`: CAF lifecycle, LOAD interception, capability detection,
-  receiver event logging and browser fallback.
+- `data/channel`: strict asset parsing, uniqueness and regional consistency.
+- `data/metadata`: SR HTTP adapter, raw-shape parser and bounded cache decorator.
+- `domain`: channel, region, normalized now-playing/next-program models and repository/provider contracts.
+- `ui`: favorites, national, expandable local P4 and other sections; selected-channel metadata refresh only.
+- `cast`: direct live MediaInfo with stable `radioapp://channel/<id>` entity and metadata fallback.
+
+## Receiver
+
+- `channel.ts`: runtime catalog validation.
+- `metadata.ts`: SR right-now parsing/cache plus normalized CAF media mapping.
+- `browse/`: framework-neutral deterministic selection and CAF object adapter.
+- `main.ts`: LOAD interception, receiver-side metadata refresh, status broadcast, Media Browse, capability detection and browser development mode.
+
+Receiver-side refresh matters because the Hub should remain useful after Android disconnects. It uses SR directly over CORS and no backend. The timer exists only for the loaded channel and is cleared on IDLE.
 
 ## Failure boundaries
 
-- Catalog failure: sender shows an error; receiver keeps an explicit error
-  overlay rather than a blank page.
-- No Cast session: sender asks the user to use the standard Cast button.
-- Placeholder app ID: sender initializes safely but refuses `playChannel` and
-  reports `Custom receiver not configured`.
-- Metadata unavailable: the fixture returns no program and playback uses
-  `Direktsänd radio`.
-- LOAD failure/session loss: surfaced through sender state/snackbar.
-- Stream/media failure: CAF remains the primary player UI and receiver logging
-  exposes the failure for remote debugging.
+- Catalog failure: sender reports a load error; receiver shows an explicit overlay.
+- Metadata failure: playback continues; UI uses channel → `Sveriges Radio` → `LIVE` and local artwork.
+- Placeholder Cast ID: sender refuses custom LOAD with a configuration message.
+- Stream/session failure: normal CAF error surfaces remain authoritative.
+- Missing or retired favorite: filtered from presentation without crashing or creating a phantom row.
 
-## Trust and infrastructure
-
-No Firebase, custom backend, streaming proxy, login or API key is used. Static
-receiver hosting is the only infrastructure required for device testing.
+No Firebase, cloud backend, proxy, account system, podcast/on-demand layer or Assistant Actions are part of this architecture.

@@ -2,6 +2,7 @@ import { Channel } from "../channel";
 import { channelEntity } from "../metadata";
 
 export const DEFAULT_FAVORITES = new Set(["p1", "p3", "p4-malmo"]);
+export const DEFAULT_P4 = "p4-malmo";
 
 export interface BrowseItemModel {
   entity: string;
@@ -22,12 +23,15 @@ export function createBrowsePlan(
   const asItem = (channel: Channel): BrowseItemModel => ({
     entity: channelEntity(channel.id),
     title: channel.name,
-    subtitle: channel.isLocal ? `LIVE · ${channel.region}` : "LIVE · Sveriges Radio",
+    subtitle: channel.isLocal ? `LIVE · ${channel.region?.name ?? channel.name}` : "LIVE · Sveriges Radio",
     imageUrl: channel.imageUrl ?? fallbackImage,
     live: true,
   });
   return {
     landing: { title: "Favoriter", items: channels.filter((channel) => favoriteIds.has(channel.id)).map(asItem) },
-    inPlayer: { title: "Kanaler", items: channels.map(asItem) },
+    inPlayer: {
+      title: "Utvalda kanaler",
+      items: channels.filter((channel) => channel.category !== "LOCAL_P4" || channel.id === DEFAULT_P4).map(asItem),
+    },
   };
 }
