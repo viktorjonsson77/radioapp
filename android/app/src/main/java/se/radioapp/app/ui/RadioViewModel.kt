@@ -1,5 +1,6 @@
 package se.radioapp.app.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,6 +81,7 @@ class RadioViewModel(
     }
 
     fun play(channel: Channel) {
+        Log.i(TAG, "channel action id=${channel.id} streamUrl=${channel.streamUrl}")
         castController.playChannel(channel, nowPlaying.value?.takeIf { it.channelId == channel.id })
         metadataJob?.cancel()
         nowPlaying.value = null
@@ -113,5 +115,9 @@ class RadioViewModel(
         metadataJob?.cancel()
         nowPlaying.value = null
         castController.stop()
+    }
+
+    private companion object {
+        const val TAG = "RadioAppCast"
     }
 }

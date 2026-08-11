@@ -3,12 +3,14 @@ package se.radioapp.app.cast
 import com.google.android.gms.cast.CastMediaControlIntent
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import se.radioapp.app.BuildConfig
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
@@ -60,5 +62,23 @@ class CastReceiverConfigurationTest {
         assertEquals(CastReceiverMode.CUSTOM, configuration.mode)
         assertFalse(configuration.isPlaybackConfigured)
         assertTrue(configuration.configurationError?.contains("Unknown CAST_RECEIVER_MODE") == true)
+    }
+
+    @Test fun generatedBuildConfigSelectsAValidExplicitReceiverMode() {
+        assertNotNull(CastReceiverMode.parse(BuildConfig.CAST_RECEIVER_MODE))
+        val configuration = CastReceiverConfiguration.from(
+            BuildConfig.CAST_RECEIVER_MODE,
+            BuildConfig.CAST_RECEIVER_APP_ID,
+        )
+
+        if (configuration.mode == CastReceiverMode.DEFAULT_MEDIA_RECEIVER) {
+            assertTrue(configuration.isPlaybackConfigured)
+            assertEquals(
+                CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID,
+                configuration.receiverApplicationId(CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID),
+            )
+        } else {
+            assertEquals(CastReceiverMode.CUSTOM, configuration.mode)
+        }
     }
 }

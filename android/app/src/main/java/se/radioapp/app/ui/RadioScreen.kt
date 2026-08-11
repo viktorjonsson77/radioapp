@@ -349,7 +349,7 @@ private fun FavoriteRow(
             FavoriteCard(
                 channel = channel,
                 selected = isSelectedChannel(channel, castState),
-                onPlay = { onPlay(channel) },
+                onPlay = { dispatchChannelPlayback(channel, onPlay) },
                 onRemove = { onToggleFavorite(channel) },
             )
         }
@@ -401,7 +401,7 @@ private fun ChannelGroup(
                 subtitle = channelSubtitle(channel, state.defaultP4Channel?.id ?: state.defaultP4ChannelId),
                 favorite = channel.id in state.favoriteIds,
                 selected = isSelectedChannel(channel, castState),
-                onPlay = { onPlay(channel) },
+                onPlay = { dispatchChannelPlayback(channel, onPlay) },
                 onToggleFavorite = { onToggleFavorite(channel) },
             )
         }
@@ -430,7 +430,9 @@ private fun P4Section(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Artwork(defaultP4.imageUrl, defaultP4.name, Modifier.size(58.dp), Color.White)
                     Column(
-                        Modifier.weight(1f).padding(horizontal = 12.dp).clickable { onPlay(defaultP4) },
+                        Modifier.weight(1f).padding(horizontal = 12.dp).clickable {
+                            dispatchChannelPlayback(defaultP4, onPlay)
+                        },
                     ) {
                         Text(defaultP4.name, fontWeight = FontWeight.Bold)
                         Text("Din standardkanal", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -454,7 +456,7 @@ private fun P4Section(
                             subtitle = channelSubtitle(channel, defaultP4?.id ?: state.defaultP4ChannelId),
                             favorite = channel.id in state.favoriteIds,
                             selected = isSelectedChannel(channel, castState),
-                            onPlay = { onPlay(channel) },
+                            onPlay = { dispatchChannelPlayback(channel, onPlay) },
                             onToggleFavorite = { onToggleFavorite(channel) },
                         )
                     }

@@ -37,8 +37,14 @@ toggle and connected-device naming. Nest Hub touch/layout remains
 
 Receiver-mode tests cover explicit CUSTOM selection, DEFAULT aliases, use of
 Google's official Default Receiver constant, missing Custom App ID safety and
-unknown-mode rejection. MediaInfo tests verify P1 AAC live fields, standard
+unknown-mode rejection. They also validate the mode emitted into the current
+build's generated `BuildConfig`. MediaInfo tests verify P1 AAC live fields, standard
 metadata/artwork, optional current-program metadata and absence of custom data.
+
+`RadioUiStateTest` verifies that a channel action forwards the original Channel
+instance and its official stream URL to the playback callback. This covers the
+Compose presentation boundary without claiming that a JVM test performs a
+physical Cast LOAD.
 
 `MediaRouteButtonThemeTest` verifies that the Compose-hosted MediaRouter button
 receives an opaque AppCompat `colorPrimary` and that the framework view can be

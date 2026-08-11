@@ -28,6 +28,10 @@ fun castDestinationText(state: CastUiState): String? =
 fun isSelectedChannel(channel: Channel, state: CastUiState): Boolean =
     state.currentChannel?.id == channel.id
 
+internal fun dispatchChannelPlayback(channel: Channel, onPlay: (Channel) -> Unit) {
+    onPlay(channel)
+}
+
 fun channelSubtitle(channel: Channel, defaultP4ChannelId: String): String = when {
     channel.category == ChannelCategory.LOCAL_P4 && channel.id == defaultP4ChannelId -> "Standard · Lokalt"
     channel.category == ChannelCategory.LOCAL_P4 -> channel.region?.name?.let { "Lokalt · $it" } ?: "Lokalt"

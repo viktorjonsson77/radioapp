@@ -70,6 +70,16 @@ class RadioUiStateTest {
         assertEquals("Spelar på Cast-enhet", castDestinationText(CastUiState(connected = true)))
     }
 
+    @Test fun channelPlaybackActionForwardsTheOriginalChannelAndStream() {
+        val p1 = channel("p1", ChannelCategory.NATIONAL)
+        var received: Channel? = null
+
+        dispatchChannelPlayback(p1) { received = it }
+
+        assertTrue(received === p1)
+        assertEquals(p1.streamUrl, received?.streamUrl)
+    }
+
     private fun channel(
         id: String,
         category: ChannelCategory,

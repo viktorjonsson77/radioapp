@@ -32,10 +32,15 @@ supplies the selected receiver ID through the documented
 Build and install:
 
 ```bash
-cd /opt/radioapp/android
-./gradlew test lintDebug assembleDebug
-adb install -r /opt/radioapp/android/app/build/outputs/apk/debug/app-debug.apk
+cd /opt/radioapp
+tools/build-default-receiver-apk.sh
+adb install -r /opt/radioapp/android/app/build/outputs/apk/default-receiver/radioapp-default-receiver-debug.apk
 ```
+
+The script passes `-PCAST_RECEIVER_MODE=DEFAULT`, performs a clean build,
+verifies the generated `BuildConfig`, and writes a mode-specific filename. This
+prevents the ordinary CUSTOM-default `app-debug.apk` from being mistaken for a
+physical Default Receiver test build. No Custom Application ID is required.
 
 The Android debug UI exposes the following diagnostics at the bottom of the
 screen; release/product presentation does not show receiver implementation

@@ -83,30 +83,60 @@ class CastController(context: Context) {
 
     fun playChannel(channel: Channel, program: NowPlayingMetadata? = null) {
         val configuration = CastOptionsProvider.configuration
-        if (!configuration.isPlaybackConfigured) {
-            failed(configuration.configurationError ?: "Cast receiver not configured")
-            return
-        }
         val session = sessionManager.currentCastSession
         val client = session?.remoteMediaClient
+        Log.i(
+            TAG,
+            "playChannel entered id=${channel.id} streamUrl=${channel.streamUrl} " +
+                "receiverMode=${configuration.mode} configured=${configuration.isPlaybackConfigured} " +
+                "sessionPresent=${session != null} sessionConnected=${session?.isConnected == true} " +
+                "mediaClientPresent=${client != null}",
+        )
+        if (!configuration.isPlaybackConfigured) {
+            val error = configuration.configurationError ?: "Cast receiver not configured"
+            Log.e(TAG, "playChannel blocked before LOAD: $error")
+            failed(error)
+            return
+        }
         if (session?.isConnected != true || client == null) {
+            Log.w(TAG, "playChannel blocked before LOAD: no connected Cast session/media client")
             failed("Ingen Cast-enhet är ansluten – använd Cast-knappen")
             return
         }
 
+        val mediaInfo = runCatching { CastMediaInfoMapper.map(channel, program) }
+            .onFailure { Log.e(TAG, "MediaInfo creation failed id=${channel.id}", it) }
+            .getOrElse {
+                failed("Kanalen kunde inte förberedas för uppspelning")
+                return
+            }
+        Log.i(
+            TAG,
+            "MediaInfo created id=${channel.id} contentId=${mediaInfo.contentId} " +
+                "contentType=${mediaInfo.contentType} streamType=${mediaInfo.streamType}",
+        )
         val request = MediaLoadRequestData.Builder()
-            .setMediaInfo(CastMediaInfoMapper.map(channel, program))
+            .setMediaInfo(mediaInfo)
             .setAutoplay(true)
             .build()
-        Log.i(TAG, "channel LOAD id=${channel.id} receiverMode=${configuration.mode}")
-        client.load(request).setResultCallback { result ->
-            if (result.status.isSuccess) {
-                Log.i(TAG, "channel LOAD accepted id=${channel.id}")
-                mutableState.value = mutableState.value.copy(currentChannel = channel, isPlaying = true, message = null)
-            } else {
-                Log.e(TAG, "channel LOAD failed id=${channel.id} status=${result.status.statusCode}")
-                failed("Streamen kunde inte startas: ${result.status.statusMessage ?: result.status.statusCode}")
+        Log.i(TAG, "LOAD requested id=${channel.id} receiverMode=${configuration.mode}")
+        runCatching {
+            client.load(request).setResultCallback { result ->
+                if (result.status.isSuccess) {
+                    Log.i(TAG, "LOAD result success id=${channel.id} status=${result.status.statusCode}")
+                    mutableState.value = mutableState.value.copy(currentChannel = channel, isPlaying = true, message = null)
+                } else {
+                    Log.e(
+                        TAG,
+                        "LOAD result failure id=${channel.id} status=${result.status.statusCode} " +
+                            "message=${result.status.statusMessage}",
+                    )
+                    failed("Streamen kunde inte startas: ${result.status.statusMessage ?: result.status.statusCode}")
+                }
             }
+        }.onFailure {
+            Log.e(TAG, "LOAD request exception id=${channel.id}", it)
+            failed("Streamen kunde inte startas")
         }
     }
 
