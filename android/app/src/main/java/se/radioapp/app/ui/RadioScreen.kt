@@ -1,5 +1,7 @@
 package se.radioapp.app.ui
 
+import android.content.Context
+import android.view.ContextThemeWrapper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -169,10 +171,16 @@ private fun CastButton() {
     AndroidView(
         modifier = Modifier.size(48.dp).padding(8.dp),
         factory = { context ->
-            MediaRouteButton(context).also { CastButtonFactory.setUpMediaRouteButton(context, it) }
+            val buttonContext = mediaRouteButtonContext(context)
+            MediaRouteButton(buttonContext).also {
+                CastButtonFactory.setUpMediaRouteButton(buttonContext, it)
+            }
         },
     )
 }
+
+internal fun mediaRouteButtonContext(context: Context): Context =
+    ContextThemeWrapper(context, R.style.Theme_RadioApp_MediaRouteButton)
 
 @Composable
 private fun NowPlaying(state: CastUiState, uiState: RadioUiState, onTogglePlayback: () -> Unit, onStop: () -> Unit) {

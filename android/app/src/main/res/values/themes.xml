@@ -2,7 +2,17 @@
     <style name="Theme.RadioApp" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:statusBarColor">#FFF8F5</item>
-        <item name="android:navigationBarColor">#FFF8F5</item>
+        <item name="android:statusBarColor">@color/radio_background</item>
+        <item name="android:navigationBarColor">@color/radio_background</item>
+    </style>
+
+    <!-- MediaRouter is an AppCompat View and reads colorPrimary before applying
+         its own button overlay. Compose's MaterialTheme does not supply that XML attr. -->
+    <style name="Theme.RadioApp.MediaRouteButton" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/radio_primary</item>
+        <item name="colorPrimaryDark">@color/radio_primary</item>
+        <item name="colorAccent">@color/radio_primary</item>
+        <item name="android:colorBackground">@color/radio_background</item>
+        <item name="android:windowBackground">@color/radio_background</item>
     </style>
 </resources>

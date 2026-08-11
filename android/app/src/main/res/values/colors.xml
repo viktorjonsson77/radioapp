@@ -1,1 +1,5 @@
-<resources><color name="launcher_background">#D71920</color></resources>
+<resources>
+    <color name="radio_primary">#D71920</color>
+    <color name="radio_background">#FFF8F5</color>
+    <color name="launcher_background">#D71920</color>
+</resources>

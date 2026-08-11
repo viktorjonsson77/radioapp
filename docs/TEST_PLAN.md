@@ -21,6 +21,12 @@ Google's official Default Receiver constant, missing Custom App ID safety and
 unknown-mode rejection. MediaInfo tests verify P1 AAC live fields, standard
 metadata/artwork, optional current-program metadata and absence of custom data.
 
+`MediaRouteButtonThemeTest` verifies that the Compose-hosted MediaRouter button
+receives an opaque AppCompat `colorPrimary` and that the framework view can be
+constructed with its dedicated XML theme. This is local regression coverage;
+confirming the original Samsung startup crash is resolved is
+**REAL_DEVICE_REQUIRED**.
+
 ## Temporary Default Receiver physical test
 
 Use `docs/DEFAULT_RECEIVER_TEST.md` and record results in
