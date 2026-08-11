@@ -74,7 +74,7 @@ class RadioViewModel(
     }
 
     fun play(channel: Channel) {
-        castController.playChannel(channel)
+        castController.playChannel(channel, nowPlaying.value?.takeIf { it.channelId == channel.id })
         metadataJob?.cancel()
         nowPlaying.value = null
         metadataJob = viewModelScope.launch {

@@ -55,6 +55,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import se.radioapp.app.R
 import se.radioapp.app.cast.CastOptionsProvider
+import se.radioapp.app.cast.CastReceiverMode
 import se.radioapp.app.cast.CastUiState
 import se.radioapp.app.domain.model.Channel
 
@@ -98,9 +99,22 @@ fun RadioScreen(
                 item {
                     SectionTitle("Spelas nu")
                     NowPlaying(castState, state, onTogglePlayback, onStop)
-                    if (!CastOptionsProvider.isCustomReceiverConfigured) {
+                    val receiverConfiguration = CastOptionsProvider.configuration
+                    Text(
+                        "Receiver: ${receiverConfiguration.receiverLabel}",
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                    if (receiverConfiguration.mode == CastReceiverMode.DEFAULT_MEDIA_RECEIVER) {
                         Text(
-                            "Custom receiver not configured",
+                            "TEMPORARY TEST MODE · Inte RadioApps Custom Receiver",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                    receiverConfiguration.configurationError?.let { error ->
+                        Text(
+                            error,
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.labelLarge,
                             modifier = Modifier.padding(top = 8.dp),

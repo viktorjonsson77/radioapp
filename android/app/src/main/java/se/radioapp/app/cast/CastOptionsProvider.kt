@@ -9,10 +9,12 @@ import se.radioapp.app.BuildConfig
 
 class CastOptionsProvider : OptionsProvider {
     override fun getCastOptions(context: Context): CastOptions {
-        val receiverId = BuildConfig.CAST_RECEIVER_APP_ID.takeUnless { it == PLACEHOLDER || it.isBlank() }
-            ?: CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID
         return CastOptions.Builder()
-            .setReceiverApplicationId(receiverId)
+            .setReceiverApplicationId(
+                configuration.receiverApplicationId(
+                    CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID,
+                ),
+            )
             .setEnableReconnectionService(true)
             .build()
     }
@@ -20,9 +22,11 @@ class CastOptionsProvider : OptionsProvider {
     override fun getAdditionalSessionProviders(context: Context): List<SessionProvider>? = null
 
     companion object {
-        const val PLACEHOLDER = "REPLACE_ME"
-        val isCustomReceiverConfigured: Boolean
-            get() = BuildConfig.CAST_RECEIVER_APP_ID.isNotBlank() &&
-                BuildConfig.CAST_RECEIVER_APP_ID != PLACEHOLDER
+        val configuration: CastReceiverConfiguration by lazy {
+            CastReceiverConfiguration.from(
+                rawMode = BuildConfig.CAST_RECEIVER_MODE,
+                rawCustomReceiverApplicationId = BuildConfig.CAST_RECEIVER_APP_ID,
+            )
+        }
     }
 }

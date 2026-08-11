@@ -5,6 +5,10 @@
 > This is not a receiver, Android, build or architecture failure. No code
 > workaround or fabricated Application ID is used.
 
+Google Default Media Receiver may be used only for the separate temporary
+sender/stream test in `DEFAULT_RECEIVER_TEST.md`; it does not complete or bypass
+the registration checklist below.
+
 This checklist prepares the first physical test. Completing it does not by
 itself verify Cast behavior. Record the actual run in
 `test-results/REAL_DEVICE_TEST_TEMPLATE.md`.

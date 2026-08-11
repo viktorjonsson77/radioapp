@@ -58,12 +58,18 @@ Put the Application ID in the untracked `android/local.properties`:
 
 ```properties
 sdk.dir=/opt/android-sdk
+CAST_RECEIVER_MODE=CUSTOM
 CAST_RECEIVER_APP_ID=YOUR_APPLICATION_ID
 ```
 
 Alternatively pass `-PCAST_RECEIVER_APP_ID=...` or set an environment variable.
 The value is compiled once into `BuildConfig` and consumed only by
 `CastOptionsProvider`; it is not duplicated.
+
+`CUSTOM` is the default mode if `CAST_RECEIVER_MODE` is omitted. During the
+external registration blocker only, follow `DEFAULT_RECEIVER_TEST.md` to use
+Google Default Media Receiver without an Application ID. That temporary mode is
+not a replacement for any step in Custom Receiver registration or verification.
 
 ```bash
 cd android

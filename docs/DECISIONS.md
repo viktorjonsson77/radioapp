@@ -77,3 +77,13 @@ expose all 36. This clear policy is preferred to arbitrary truncation.
 
 SR returned wildcard CORS to the deployed GitHub Pages origin, so receiver-side
 refresh needs no proxy. Failure falls back locally and never affects audio.
+
+## D014 — Temporary Default Media Receiver device-test mode
+
+Status: temporary while Google Cast Developer identity/payment verification is
+externally blocked. Android may explicitly select `DEFAULT` and then uses
+`CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID` for basic physical
+sender/stream testing without an Application ID. `CUSTOM` remains the default,
+and D001 remains the accepted product architecture. Default Receiver results do
+not verify GitHub Pages, custom UI/lifecycle, Media Browse, touch navigation or
+receiver-side metadata refresh.

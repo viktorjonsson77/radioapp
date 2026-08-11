@@ -41,17 +41,27 @@ Cast sessions, Nest Hub touch, Media Browse, or physical stream playback.
 
 ## Cast configuration
 
-The checked-in development value is `CAST_RECEIVER_APP_ID=REPLACE_ME`. Supply a
-real ID through `android/local.properties`, a Gradle property, or the environment:
+The default receiver mode is `CUSTOM`. Supply the real RadioApp receiver ID
+through ignored `android/local.properties`, a Gradle property, or the environment:
 
 ```properties
+CAST_RECEIVER_MODE=CUSTOM
 CAST_RECEIVER_APP_ID=YOUR_APP_ID
 ```
 
-With the placeholder, the app remains buildable and shows `Custom receiver not
-configured`; it does not accidentally load an SR stream through Google's Default
-Media Receiver. See [docs/CAST_SETUP.md](docs/CAST_SETUP.md) for registration and
-device-test instructions.
+With a missing/placeholder custom ID, the app remains buildable but blocks media
+LOAD with `Custom receiver not configured`.
+
+While Google developer registration is externally blocked, an explicit
+temporary physical-test mode is available:
+
+```properties
+CAST_RECEIVER_MODE=DEFAULT
+```
+
+This uses Google's SDK constant for the Default Media Receiver and needs no
+Application ID. It tests only sender-to-stream fundamentals, never RadioApp's
+Custom Receiver. See [docs/DEFAULT_RECEIVER_TEST.md](docs/DEFAULT_RECEIVER_TEST.md).
 
 ## Current verification boundary
 

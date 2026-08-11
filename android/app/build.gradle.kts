@@ -17,6 +17,11 @@ val castReceiverAppId = providers.gradleProperty("CAST_RECEIVER_APP_ID")
     .orElse(localProperties.getProperty("CAST_RECEIVER_APP_ID") ?: "REPLACE_ME")
     .get()
 
+val castReceiverMode = providers.gradleProperty("CAST_RECEIVER_MODE")
+    .orElse(providers.environmentVariable("CAST_RECEIVER_MODE"))
+    .orElse(localProperties.getProperty("CAST_RECEIVER_MODE") ?: "CUSTOM")
+    .get()
+
 android {
     namespace = "se.radioapp.app"
     compileSdk = 36
@@ -30,6 +35,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "CAST_RECEIVER_APP_ID", "\"$castReceiverAppId\"")
+        buildConfigField("String", "CAST_RECEIVER_MODE", "\"$castReceiverMode\"")
     }
 
     buildFeatures {

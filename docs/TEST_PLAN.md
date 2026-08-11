@@ -16,6 +16,18 @@ Receiver `npm test` covers catalog parsing/rejection, category/P4 counts, curren
 
 Android `./gradlew test` covers asset repository parsing/lookups, SR IDs/regions, metadata parsing/current/next/optional fields, network failure, timeout, cache/stale fallback, favorites, missing old favorite presentation, default P4 and Cast live-media mapping. `./gradlew lintDebug` and `./gradlew assembleDebug` verify the application artifact.
 
+Receiver-mode tests cover explicit CUSTOM selection, DEFAULT aliases, use of
+Google's official Default Receiver constant, missing Custom App ID safety and
+unknown-mode rejection. MediaInfo tests verify P1 AAC live fields, standard
+metadata/artwork, optional current-program metadata and absence of custom data.
+
+## Temporary Default Receiver physical test
+
+Use `docs/DEFAULT_RECEIVER_TEST.md` and record results in
+`test-results/DEFAULT_RECEIVER_DEVICE_TEST_TEMPLATE.md`. This may verify only
+Android Sender → Google Cast → SR stream. It cannot verify any Custom Receiver,
+Media Browse, Hub-touch browser, Hub-only navigation or GitHub Pages behavior.
+
 ## Optional live smoke verification
 
 ```bash

@@ -1,10 +1,13 @@
 package se.radioapp.app.cast
 
 import android.content.Context
+import android.util.Log
 import com.google.android.gms.cast.MediaLoadRequestData
+import com.google.android.gms.cast.MediaStatus
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManagerListener
+import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,19 +27,53 @@ class CastController(context: Context) {
     private val sessionManager = castContext.sessionManager
     private val mutableState = MutableStateFlow(CastUiState())
     val state: StateFlow<CastUiState> = mutableState.asStateFlow()
+    private var observedMediaClient: RemoteMediaClient? = null
+
+    private val mediaCallback = object : RemoteMediaClient.Callback() {
+        override fun onStatusUpdated() {
+            val client = observedMediaClient ?: return
+            val status = client.mediaStatus
+            Log.d(TAG, "media status state=${status?.playerState} idleReason=${status?.idleReason}")
+            mutableState.value = mutableState.value.copy(isPlaying = client.isPlaying)
+            if (status?.idleReason == MediaStatus.IDLE_REASON_ERROR) {
+                Log.e(TAG, "playback error: receiver reported IDLE_REASON_ERROR")
+            }
+        }
+
+        override fun onMediaError(mediaError: com.google.android.gms.cast.MediaError) {
+            Log.e(TAG, "playback error: $mediaError")
+        }
+    }
 
     private val sessionListener = object : SessionManagerListener<CastSession> {
-        override fun onSessionStarted(session: CastSession, sessionId: String) = connected(session)
-        override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) = connected(session)
-        override fun onSessionStarting(session: CastSession) = Unit
-        override fun onSessionStartFailed(session: CastSession, error: Int) = failed("Receiver unavailable ($error)")
-        override fun onSessionEnding(session: CastSession) = Unit
+        override fun onSessionStarted(session: CastSession, sessionId: String) {
+            Log.i(TAG, "Cast session started")
+            connected(session)
+        }
+        override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {
+            Log.i(TAG, "Cast session resumed wasSuspended=$wasSuspended")
+            connected(session)
+        }
+        override fun onSessionStarting(session: CastSession) { Log.i(TAG, "Cast session starting") }
+        override fun onSessionStartFailed(session: CastSession, error: Int) {
+            Log.e(TAG, "Cast session failed error=$error")
+            failed("Receiver unavailable ($error)")
+        }
+        override fun onSessionEnding(session: CastSession) { Log.i(TAG, "Cast session disconnecting") }
         override fun onSessionEnded(session: CastSession, error: Int) {
+            Log.i(TAG, "Cast session disconnected error=$error")
+            stopObservingMedia()
             mutableState.value = CastUiState(message = if (error == 0) null else "Cast-sessionen avslutades ($error)")
         }
-        override fun onSessionResuming(session: CastSession, sessionId: String) = Unit
-        override fun onSessionResumeFailed(session: CastSession, error: Int) = failed("Cast-sessionen kunde inte återanslutas ($error)")
-        override fun onSessionSuspended(session: CastSession, reason: Int) = failed("Cast-sessionen tappades ($reason)")
+        override fun onSessionResuming(session: CastSession, sessionId: String) { Log.i(TAG, "Cast session resuming") }
+        override fun onSessionResumeFailed(session: CastSession, error: Int) {
+            Log.e(TAG, "Cast session resume failed error=$error")
+            failed("Cast-sessionen kunde inte återanslutas ($error)")
+        }
+        override fun onSessionSuspended(session: CastSession, reason: Int) {
+            Log.w(TAG, "Cast session suspended reason=$reason")
+            failed("Cast-sessionen tappades ($reason)")
+        }
     }
 
     init {
@@ -45,8 +82,9 @@ class CastController(context: Context) {
     }
 
     fun playChannel(channel: Channel, program: NowPlayingMetadata? = null) {
-        if (!CastOptionsProvider.isCustomReceiverConfigured) {
-            failed("Custom receiver not configured")
+        val configuration = CastOptionsProvider.configuration
+        if (!configuration.isPlaybackConfigured) {
+            failed(configuration.configurationError ?: "Cast receiver not configured")
             return
         }
         val session = sessionManager.currentCastSession
@@ -60,10 +98,13 @@ class CastController(context: Context) {
             .setMediaInfo(CastMediaInfoMapper.map(channel, program))
             .setAutoplay(true)
             .build()
+        Log.i(TAG, "channel LOAD id=${channel.id} receiverMode=${configuration.mode}")
         client.load(request).setResultCallback { result ->
             if (result.status.isSuccess) {
+                Log.i(TAG, "channel LOAD accepted id=${channel.id}")
                 mutableState.value = mutableState.value.copy(currentChannel = channel, isPlaying = true, message = null)
             } else {
+                Log.e(TAG, "channel LOAD failed id=${channel.id} status=${result.status.statusCode}")
                 failed("Streamen kunde inte startas: ${result.status.statusMessage ?: result.status.statusCode}")
             }
         }
@@ -76,10 +117,14 @@ class CastController(context: Context) {
             return
         }
         val shouldPlay = !client.isPlaying
+        Log.i(TAG, "playback command=${if (shouldPlay) "play" else "pause"}")
         val result = if (shouldPlay) client.play() else client.pause()
         result.setResultCallback { status ->
             if (status.status.isSuccess) mutableState.value = mutableState.value.copy(isPlaying = shouldPlay, message = null)
-            else failed("Uppspelningskommandot misslyckades")
+            else {
+                Log.e(TAG, "playback command failed status=${status.status.statusCode}")
+                failed("Uppspelningskommandot misslyckades")
+            }
         }
     }
 
@@ -89,16 +134,21 @@ class CastController(context: Context) {
             failed("Ingen Cast-enhet är ansluten")
             return
         }
+        Log.i(TAG, "playback command=stop")
         client.stop().setResultCallback { status ->
             if (status.status.isSuccess) {
                 mutableState.value = mutableState.value.copy(currentChannel = null, isPlaying = false, message = null)
-            } else failed("Stop-kommandot misslyckades")
+            } else {
+                Log.e(TAG, "stop command failed status=${status.status.statusCode}")
+                failed("Stop-kommandot misslyckades")
+            }
         }
     }
 
     fun clearMessage() { mutableState.value = mutableState.value.copy(message = null) }
 
     private fun connected(session: CastSession) {
+        observeMedia(session.remoteMediaClient)
         mutableState.value = mutableState.value.copy(
             connected = true,
             receiverName = session.castDevice?.friendlyName,
@@ -109,4 +159,18 @@ class CastController(context: Context) {
     private fun failed(message: String) {
         mutableState.value = mutableState.value.copy(message = message)
     }
+
+    private fun observeMedia(client: RemoteMediaClient?) {
+        if (observedMediaClient === client) return
+        stopObservingMedia()
+        observedMediaClient = client
+        client?.registerCallback(mediaCallback)
+    }
+
+    private fun stopObservingMedia() {
+        observedMediaClient?.unregisterCallback(mediaCallback)
+        observedMediaClient = null
+    }
+
+    companion object { private const val TAG = "RadioAppCast" }
 }

@@ -44,3 +44,4 @@ local.properties
 test-results/*
 !test-results/.gitkeep
 !test-results/REAL_DEVICE_TEST_TEMPLATE.md
+!test-results/DEFAULT_RECEIVER_DEVICE_TEST_TEMPLATE.md

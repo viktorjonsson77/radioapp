@@ -13,6 +13,19 @@ Android sender ───────────────> Custom Web Receive
 
 The media URL in every LOAD is the official SR HTTPS URL. The Cast device fetches audio directly; Android is never an audio proxy. Metadata calls are independent and never gate LOAD, channel switching or controls.
 
+The checked-in/default receiver mode is `CUSTOM`. A temporary, explicit
+`DEFAULT_MEDIA_RECEIVER` test branch changes only the Application ID selected by
+Android's `CastOptionsProvider`:
+
+```text
+CUSTOM (product architecture) ──> RadioApp Custom Web Receiver
+DEFAULT (temporary device PoC) ─> Google Default Media Receiver
+```
+
+Both branches send the same standard live `MediaInfo` and official stream URL.
+The temporary branch does not execute or validate any receiver code in
+`receiver/`.
+
 ## Shared content layer
 
 - `shared/channels.json`: schema-v2 catalog with stable internal IDs, numeric SR IDs, structured P4 region data, official streams and channel images.
@@ -27,6 +40,8 @@ The media URL in every LOAD is the official SR HTTPS URL. The Cast device fetche
 - `domain`: channel, region, normalized now-playing/next-program models and repository/provider contracts.
 - `ui`: favorites, national, expandable local P4 and other sections; selected-channel metadata refresh only.
 - `cast`: direct live MediaInfo with stable `radioapp://channel/<id>` entity and metadata fallback.
+- `cast/CastReceiverConfiguration`: central mode selection; CUSTOM is default,
+  while DEFAULT resolves through Google's official SDK constant.
 
 ## Receiver
 
@@ -42,6 +57,8 @@ Receiver-side refresh matters because the Hub should remain useful after Android
 - Catalog failure: sender reports a load error; receiver shows an explicit overlay.
 - Metadata failure: playback continues; UI uses channel → `Sveriges Radio` → `LIVE` and local artwork.
 - Placeholder Cast ID: sender refuses custom LOAD with a configuration message.
+- Explicit Default Receiver mode: playback is allowed without a Custom App ID,
+  but UI marks it as a temporary non-custom test.
 - Stream/session failure: normal CAF error surfaces remain authoritative.
 - Missing or retired favorite: filtered from presentation without crashing or creating a phantom row.
 
